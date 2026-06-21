@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copa do Mundo 2026 — Classificação</title>
+
+<!-- PWA: manifest e ícones -->
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="theme-color" content="#0B3D2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Copa 2026">
+<meta name="description" content="Classificação dos 12 grupos da Copa do Mundo 2026, com saldo de gols e jogos recentes.">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --field:#0B3D2E;
+    --field-deep:#082E22;
+    --chalk:#F5F2EA;
+    --gold:#C9A24B;
+    --card-red:#B83227;
+    --ink:#16201B;
+    --line: rgba(245,242,234,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--field);
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 64px);
+    color: var(--chalk);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  /* HEADER */
+  header{
+    display:flex; flex-wrap:wrap; gap:16px;
+    align-items:flex-end; justify-content:space-between;
+    padding-bottom:18px; margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .title-block .eyebrow{
+    font-family:'Oswald', sans-serif;
+    font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--gold); margin:0 0 4px;
+  }
+  .title-block h1{
+    font-family:'Oswald', sans-serif;
+    font-weight:700; font-size: clamp(28px, 5vw, 44px);
+    line-height:1; margin:0; text-transform:uppercase; letter-spacing:0.01em;
+  }
+  .title-block .sub{
+    font-size:13px; color: rgba(245,242,234,0.6); margin-top:6px;
+  }
+
+  /* UPDATE PANEL */
+  .update-panel{
+    display:flex; align-items:center; gap:14px;
+  }
+  .last-update{
+    text-align:right; font-size:12px; color: rgba(245,242,234,0.55);
+    line-height:1.4;
+  }
+  .last-update strong{ display:block; color: var(--chalk); font-size:13px; }
+
+  #refresh-btn{
+    position:relative;
+    font-family:'Oswald', sans-serif;
+    font-weight:600; font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+    background: var(--gold);
+    color: var(--ink);
+    border:none; border-radius:6px;
+    padding:13px 18px;
+    cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    transition: transform 0.08s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  }
+  #refresh-btn:hover{ filter: brightness(1.06); }
+  #refresh-btn:active{ transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0.25); }
+  #refresh-btn:focus-visible{ outline: 2px solid var(--chalk); outline-offset:3px; }
+  #refresh-btn .flip-icon{
+    display:inline-block; width:14px; height:14px;
+    border:2px solid var(--ink); border-radius:3px;
+    transform-style: preserve-3d;
+  }
+  #refresh-btn.flipping .flip-icon{
+    animation: flip 0.5s ease;
+  }
+  @keyframes flip{
+    0%{ transform: rotateX(0deg); }
+    50%{ transform: rotateX(180deg); }
+    100%{ transform: rotateX(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    #refresh-btn.flipping .flip-icon{ animation:none; }
+  }
+
+  /* INSTRUCTION STRIP */
+  .howto{
+    background: rgba(201,162,75,0.08);
+    border:1px solid rgba(201,162,75,0.3);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.5;
+    color: rgba(245,242,234,0.85);
+    margin-bottom: 28px;
+  }
+  .howto strong{ color: var(--gold); }
+  .howto code{
+    background: rgba(0,0,0,0.25);
+    padding:2px 6px; border-radius:4px;
+    font-family: 'Oswald', sans-serif; font-size:12px;
+  }
+
+  .install-banner{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:12px;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom: 28px;
+    font-size:13px; font-weight:500;
+  }
+  .install-banner button{
+    font-family:'Oswald', sans-serif;
+    font-weight:600; font-size:13px; letter-spacing:0.04em; text-transform:uppercase;
+    background: var(--ink); color: var(--chalk);
+    border:none; border-radius:6px;
+    padding:10px 16px; cursor:pointer;
+    flex:0 0 auto;
+  }
+  .install-banner button:hover{ filter:brightness(1.2); }
+
+  /* MATCHDAY STRIP */
+  .section-label{
+    font-family:'Oswald', sans-serif;
+    font-size:13px; letter-spacing:0.14em; text-transform:uppercase;
+    color: rgba(245,242,234,0.55);
+    margin: 0 0 12px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{
+    content:''; flex:1; height:1px; background: var(--line);
+  }
+
+  .matches-row{
+    display:flex; gap:10px; overflow-x:auto; padding-bottom:14px; margin-bottom: 32px;
+    scrollbar-width: thin;
+  }
+  .match-card{
+    flex: 0 0 auto;
+    min-width:150px;
+    background: var(--field-deep);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .match-card .grp{
+    font-family:'Oswald'; font-size:10px; letter-spacing:0.1em;
+    color: var(--gold); text-transform:uppercase; margin-bottom:6px;
+  }
+  .match-row{ display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
+  .match-row .team{ color: var(--chalk); }
+  .match-row .score{ font-family:'Oswald'; font-weight:600; }
+  .match-card.live .grp{ color: var(--card-red); }
+  .match-card .status{
+    font-size:10px; color: rgba(245,242,234,0.4); margin-top:6px; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .status.live-tag{ color: var(--card-red); font-weight:600; }
+
+  /* GROUPS GRID */
+  .groups-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap:16px;
+  }
+  .group-card{
+    background: var(--field-deep);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .group-head{
+    font-family:'Oswald', sans-serif;
+    font-weight:600; font-size:14px; letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:12px 14px;
+    background: rgba(201,162,75,0.1);
+    border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .group-head span.tag{
+    font-size:10px; color: rgba(245,242,234,0.45); letter-spacing:0.02em;
+    font-family:'Inter'; font-weight:500; text-transform:none;
+  }
+
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  thead th{
+    text-align:left; font-family:'Oswald'; font-weight:500; font-size:9.5px;
+    letter-spacing:0.06em; text-transform:uppercase;
+    color: rgba(245,242,234,0.45);
+    padding:8px 6px 6px;
+  }
+  thead th.num, tbody td.num{ text-align:center; width:26px; padding-left:4px; padding-right:4px; }
+  tbody tr{ border-top:1px solid var(--line); }
+  tbody td{ padding:7px 6px; }
+  td.pos{
+    font-family:'Oswald'; font-weight:600; color: rgba(245,242,234,0.4); width:18px;
+  }
+  tr.qualify td.pos{ color: var(--gold); }
+  tr.qualify{ background: rgba(201,162,75,0.06); }
+  td.team{ font-weight:600; }
+  td.pts{ font-family:'Oswald'; font-weight:700; color: var(--gold); text-align:center; }
+  td.gf{ color: rgba(245,242,234,0.55); }
+  td.sg{ font-weight:600; }
+  td.sg.pos-sg{ color: #6FBF8B; }
+  td.sg.neg-sg{ color: var(--card-red); }
+
+  .legend{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:11px; color: rgba(245,242,234,0.5);
+    margin-top:18px;
+  }
+  .legend-dot{
+    display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle;
+  }
+
+  footer{
+    margin-top:36px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:11px; color: rgba(245,242,234,0.4); text-align:center;
+  }
+
+  /* Toast */
+  #toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background: var(--chalk); color: var(--ink);
+    font-family:'Oswald'; font-size:13px; font-weight:600;
+    padding:12px 20px; border-radius:8px;
+    opacity:0; transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    text-align:center; max-width:90vw;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width: 600px){
+    header{ flex-direction:column; align-items:flex-start; }
+    .update-panel{ width:100%; justify-content:space-between; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <p class="eyebrow">Canadá · México · EUA</p>
+      <h1>Copa do Mundo 2026</h1>
+      <p class="sub">Classificação da fase de grupos</p>
+    </div>
+    <div class="update-panel">
+      <div class="last-update">
+        <span>Última atualização</span>
+        <strong id="update-time">21 jun 2026, dados pós-rodada</strong>
+      </div>
+      <button id="refresh-btn" onclick="handleRefreshClick()">
+        <span class="flip-icon"></span>
+        Atualizar
+      </button>
+    </div>
+  </header>
+
+  <div class="howto">
+    <strong>Como atualizar:</strong> este app não busca placares pela internet sozinho.
+    Quando quiser o resultado mais recente, volte ao chat com o Claude e peça <code>"atualiza a tabela"</code>; ele edita os dados e te entrega uma nova versão deste arquivo pra você substituir.
+  </div>
+
+  <div class="install-banner" id="install-banner" hidden>
+    <span>Instale este app na tela inicial para abrir como um app de verdade.</span>
+    <button id="install-btn">Instalar app</button>
+  </div>
+
+  <p class="section-label">Jogos recentes e próximos</p>
+  <div class="matches-row" id="matches-row"></div>
+
+  <p class="section-label">Os 12 grupos</p>
+  <div class="groups-grid" id="groups-grid"></div>
+
+  <div class="legend">
+    <div><span class="legend-dot" style="background:var(--gold)"></span>1º e 2º colocados avançam às oitavas</div>
+    <div>SG = saldo de gols (GP − GC) · critério de desempate: pontos → SG → gols pró</div>
+  </div>
+
+  <footer>
+    Dados oficiais da rodada disputada até 21 de junho de 2026. Fonte: FIFA / Sportradar.
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// Registro do service worker (suporte offline + instalação como PWA)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      // Silencioso: se falhar (ex: aberto via file://), o app continua funcionando sem cache offline.
+    });
+  });
+}
+
+// Banner de instalação (Android/desktop Chrome — dispara beforeinstallprompt)
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  const banner = document.getElementById("install-banner");
+  if (banner) banner.hidden = false;
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const installBtn = document.getElementById("install-btn");
+  if (installBtn) {
+    installBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      document.getElementById("install-banner").hidden = true;
+    });
+  }
+});
+
+window.addEventListener("appinstalled", () => {
+  const banner = document.getElementById("install-banner");
+  if (banner) banner.hidden = true;
+});
+
+const standings = {
+  A: [
+    {team:"México", abbr:"MEX", w:2,d:0,l:0,pts:6,gp:1,gc:0},
+    {team:"Coreia do Sul", abbr:"KOR", w:1,d:0,l:1,pts:3,gp:0,gc:1},
+    {team:"Tchéquia", abbr:"CZE", w:0,d:1,l:1,pts:1,gp:1,gc:1},
+    {team:"África do Sul", abbr:"RSA", w:0,d:1,l:1,pts:1,gp:1,gc:1},
+  ],
+  B: [
+    {team:"Canadá", abbr:"CAN", w:1,d:1,l:0,pts:4,gp:6,gc:0},
+    {team:"Suíça", abbr:"SUI", w:1,d:1,l:0,pts:4,gp:4,gc:1},
+    {team:"Bósnia e Herzegovina", abbr:"BIH", w:0,d:1,l:1,pts:1,gp:1,gc:4},
+    {team:"Catar", abbr:"QAT", w:0,d:1,l:1,pts:1,gp:0,gc:6},
+  ],
+  C: [
+    {team:"Brasil", abbr:"BRA", w:1,d:1,l:0,pts:4,gp:3,gc:0},
+    {team:"Marrocos", abbr:"MAR", w:1,d:1,l:0,pts:4,gp:1,gc:0},
+    {team:"Escócia", abbr:"SCO", w:1,d:0,l:1,pts:3,gp:0,gc:1},
+    {team:"Haiti", abbr:"HTI", w:0,d:0,l:2,pts:0,gp:0,gc:3},
+  ],
+  D: [
+    {team:"Estados Unidos", abbr:"USA", w:2,d:0,l:0,pts:6,gp:2,gc:0},
+    {team:"Austrália", abbr:"AUS", w:1,d:0,l:1,pts:3,gp:0,gc:2},
+    {team:"Paraguai", abbr:"PAR", w:1,d:0,l:1,pts:3,gp:1,gc:0},
+    {team:"Turquia", abbr:"TUR", w:0,d:0,l:2,pts:0,gp:0,gc:1},
+  ],
+  E: [
+    {team:"Alemanha", abbr:"GER", w:2,d:0,l:0,pts:6,gp:2,gc:1},
+    {team:"Costa do Marfim", abbr:"CIV", w:1,d:0,l:1,pts:3,gp:1,gc:2},
+    {team:"Equador", abbr:"ECU", w:0,d:1,l:1,pts:1,gp:0,gc:0},
+    {team:"Curaçao", abbr:"CUW", w:0,d:1,l:1,pts:1,gp:0,gc:0},
+  ],
+  F: [
+    {team:"Países Baixos", abbr:"NED", w:1,d:1,l:0,pts:4,gp:5,gc:1},
+    {team:"Japão", abbr:"JPN", w:1,d:1,l:0,pts:4,gp:4,gc:0},
+    {team:"Suécia", abbr:"SWE", w:1,d:0,l:1,pts:3,gp:1,gc:5},
+    {team:"Tunísia", abbr:"TUN", w:0,d:0,l:2,pts:0,gp:0,gc:4},
+  ],
+  G: [
+    {team:"Nova Zelândia", abbr:"NZL", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Irã", abbr:"IRN", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Bélgica", abbr:"BEL", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Egito", abbr:"EGY", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+  ],
+  H: [
+    {team:"Uruguai", abbr:"URU", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Arábia Saudita", abbr:"KSA", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Espanha", abbr:"ESP", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Cabo Verde", abbr:"CPV", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+  ],
+  I: [
+    {team:"Noruega", abbr:"NOR", w:1,d:0,l:0,pts:3,gp:4,gc:1},
+    {team:"França", abbr:"FRA", w:1,d:0,l:0,pts:3,gp:3,gc:1},
+    {team:"Senegal", abbr:"SEN", w:0,d:0,l:1,pts:0,gp:1,gc:3},
+    {team:"Iraque", abbr:"IRQ", w:0,d:0,l:1,pts:0,gp:1,gc:4},
+  ],
+  J: [
+    {team:"Argentina", abbr:"ARG", w:1,d:0,l:0,pts:3,gp:3,gc:0},
+    {team:"Áustria", abbr:"AUT", w:1,d:0,l:0,pts:3,gp:3,gc:1},
+    {team:"Jordânia", abbr:"JOR", w:0,d:0,l:1,pts:0,gp:1,gc:3},
+    {team:"Argélia", abbr:"DZA", w:0,d:0,l:1,pts:0,gp:0,gc:3},
+  ],
+  K: [
+    {team:"Colômbia", abbr:"COL", w:1,d:0,l:0,pts:3,gp:3,gc:1},
+    {team:"Congo (RD)", abbr:"COD", w:0,d:1,l:0,pts:1,gp:1,gc:1},
+    {team:"Portugal", abbr:"POR", w:0,d:1,l:0,pts:1,gp:1,gc:1},
+    {team:"Uzbequistão", abbr:"UZB", w:0,d:0,l:1,pts:0,gp:1,gc:3},
+  ],
+  L: [
+    {team:"Inglaterra", abbr:"ENG", w:1,d:0,l:0,pts:3,gp:4,gc:2},
+    {team:"Gana", abbr:"GHA", w:1,d:0,l:0,pts:3,gp:1,gc:0},
+    {team:"Panamá", abbr:"PAN", w:0,d:0,l:1,pts:0,gp:0,gc:1},
+    {team:"Croácia", abbr:"CRO", w:0,d:0,l:1,pts:0,gp:2,gc:4},
+  ],
+};
+
+const recentMatches = [
+  {group:"H", home:"Uruguai", away:"Cabo Verde", status:"PRÓX · 21/06 19h"},
+  {group:"G", home:"Nova Zelândia", away:"Egito", status:"PRÓX · 21/06 22h"},
+  {group:"H", home:"Espanha", away:"Ar. Saudita", status:"PRÓX · 21/06 13h"},
+  {group:"G", home:"Bélgica", away:"Irã", status:"PRÓX · 21/06 16h"},
+  {group:"F", home:"Tunísia", away:"Japão", hs:0, as:4, status:"FINAL"},
+  {group:"E", home:"Equador", away:"Curaçao", hs:0, as:0, status:"FINAL"},
+  {group:"E", home:"Alemanha", away:"Costa do Marfim", hs:2, as:1, status:"FINAL"},
+  {group:"F", home:"Países Baixos", away:"Suécia", hs:5, as:1, status:"FINAL"},
+  {group:"D", home:"Turquia", away:"Paraguai", hs:0, as:1, status:"FINAL"},
+  {group:"C", home:"Brasil", away:"Haiti", hs:3, as:0, status:"FINAL"},
+];
+
+function renderMatches(){
+  const row = document.getElementById('matches-row');
+  row.innerHTML = recentMatches.map(m => {
+    const isLive = m.status === "LIVE";
+    const hasScore = m.hs !== undefined;
+    return `
+      <div class="match-card ${isLive ? 'live' : ''}">
+        <div class="grp">Grupo ${m.group}</div>
+        <div class="match-row"><span class="team">${m.home}</span><span class="score">${hasScore ? m.hs : ''}</span></div>
+        <div class="match-row"><span class="team">${m.away}</span><span class="score">${hasScore ? m.as : ''}</span></div>
+        <div class="status ${isLive ? 'live-tag' : ''}">${m.status}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderGroups(){
+  const grid = document.getElementById('groups-grid');
+  grid.innerHTML = Object.entries(standings).map(([letter, teams]) => {
+    const sorted = [...teams].sort((a,b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const sgA = a.gp - a.gc, sgB = b.gp - b.gc;
+      if (sgB !== sgA) return sgB - sgA;
+      return b.gp - a.gp;
+    });
+    const rows = sorted.map((t, i) => {
+      const sg = t.gp - t.gc;
+      const sgLabel = sg > 0 ? `+${sg}` : `${sg}`;
+      return `
+      <tr class="${i < 2 ? 'qualify' : ''}">
+        <td class="pos">${i+1}</td>
+        <td class="team">${t.team}</td>
+        <td class="num">${t.w}</td>
+        <td class="num">${t.d}</td>
+        <td class="num">${t.l}</td>
+        <td class="num gf">${t.gp}</td>
+        <td class="num gf">${t.gc}</td>
+        <td class="num sg ${sg > 0 ? 'pos-sg' : sg < 0 ? 'neg-sg' : ''}">${sgLabel}</td>
+        <td class="pts">${t.pts}</td>
+      </tr>
+    `;}).join('');
+    return `
+      <div class="group-card">
+        <div class="group-head">Grupo ${letter} <span class="tag">V·E·D·GP·GC·SG·PTS</span></div>
+        <table>
+          <thead><tr><th></th><th>Seleção</th><th class="num">V</th><th class="num">E</th><th class="num">D</th><th class="num">GP</th><th class="num">GC</th><th class="num">SG</th><th class="num">Pts</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleRefreshClick(){
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('flipping');
+  setTimeout(() => btn.classList.remove('flipping'), 500);
+  showToast('Para dados novos, peça no chat: "atualiza a tabela da Copa"');
+}
+
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+renderMatches();
+renderGroups();
+</script>
+</body>
+</html>
