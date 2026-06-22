@@ -201,6 +201,7 @@
     background: rgba(201,162,75,0.1);
     border-bottom:1px solid var(--line);
     display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
   }
   .group-head span.tag{
     font-size:10px; color: rgba(245,242,234,0.45); letter-spacing:0.02em;
@@ -237,6 +238,56 @@
   .legend-dot{
     display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle;
   }
+
+  /* EXPANSÃO DE GRUPO (toque para detalhar) */
+  .overlay-backdrop{
+    position:fixed; inset:0;
+    background: rgba(8,15,11,0.72);
+    backdrop-filter: blur(2px);
+    z-index:900;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.3s ease;
+  }
+  .overlay-backdrop.show{ opacity:1; pointer-events:auto; }
+
+  .group-card{
+    cursor:pointer;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    touch-action: manipulation;
+  }
+  .group-card:not(.expanded):active{
+    transform: scale(0.985);
+  }
+  .group-card-placeholder{ visibility:hidden; }
+
+  .groups-grid.has-expanded .group-card:not(.expanded){
+    opacity:0.28;
+    filter: blur(1.5px) saturate(0.6);
+    pointer-events:none;
+  }
+
+  .group-card.expanded{
+    position:fixed;
+    top:50%; left:50%;
+    width:min(94vw, 460px);
+    max-height:82vh;
+    z-index:1000;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+    overflow:auto;
+    cursor:default;
+  }
+  .group-card.expanded .group-head{
+    position:sticky; top:0;
+  }
+  .close-btn{ display:none; }
+  .group-card.expanded .close-btn{
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+    width:24px; height:24px; border-radius:50%;
+    background: rgba(245,242,234,0.14); color: var(--chalk);
+    font-size:13px; line-height:1; cursor:pointer; border:none;
+  }
+  .group-card.expanded .close-btn:hover{ background: rgba(245,242,234,0.24); }
 
   footer{
     margin-top:36px; padding-top:18px; border-top:1px solid var(--line);
@@ -308,6 +359,7 @@
   </footer>
 </div>
 
+<div id="overlay-backdrop" class="overlay-backdrop"></div>
 <div id="toast"></div>
 
 <script>
@@ -329,6 +381,9 @@ window.addEventListener("beforeinstallprompt", (event) => {
   if (banner) banner.hidden = false;
 });
 
+// Estado da expansão de grupo
+let expandedState = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   const installBtn = document.getElementById("install-btn");
   if (installBtn) {
@@ -340,6 +395,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("install-banner").hidden = true;
     });
   }
+
+  const backdrop = document.getElementById("overlay-backdrop");
+  if (backdrop) backdrop.addEventListener("click", closeExpand);
 });
 
 window.addEventListener("appinstalled", () => {
@@ -487,8 +545,11 @@ function renderGroups(){
       </tr>
     `;}).join('');
     return `
-      <div class="group-card">
-        <div class="group-head">Grupo ${letter} <span class="tag">V·E·D·GP·GC·SG·PTS</span></div>
+      <div class="group-card" onclick="toggleExpand(this)">
+        <div class="group-head">
+          <span class="ghead-main">Grupo ${letter} <span class="tag">V·E·D·GP·GC·SG·PTS</span></span>
+          <button class="close-btn" onclick="event.stopPropagation(); closeExpand();">✕</button>
+        </div>
         <table>
           <thead><tr><th></th><th>Seleção</th><th class="num">V</th><th class="num">E</th><th class="num">D</th><th class="num">GP</th><th class="num">GC</th><th class="num">SG</th><th class="num">Pts</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -496,6 +557,91 @@ function renderGroups(){
       </div>
     `;
   }).join('');
+}
+
+// Efeito de expansão dos cards de grupo (técnica FLIP: anima a partir da posição/tamanho originais)
+function toggleExpand(card){
+  if (expandedState) return; // já tem um grupo expandido/animando
+  if (card.classList.contains('expanded')) return;
+
+  const grid = document.getElementById('groups-grid');
+  const backdrop = document.getElementById('overlay-backdrop');
+  const firstRect = card.getBoundingClientRect();
+  const firstCenterX = firstRect.left + firstRect.width / 2;
+  const firstCenterY = firstRect.top + firstRect.height / 2;
+
+  // placeholder mantém o espaço do card no grid enquanto ele "flutua" por cima
+  const placeholder = document.createElement('div');
+  placeholder.className = 'group-card-placeholder';
+  placeholder.style.width = firstRect.width + 'px';
+  placeholder.style.height = firstRect.height + 'px';
+  card.parentNode.insertBefore(placeholder, card);
+
+  grid.classList.add('has-expanded');
+  card.classList.add('expanded');
+
+  const lastRect = card.getBoundingClientRect();
+  const finalCenterX = window.innerWidth / 2;
+  const finalCenterY = window.innerHeight / 2;
+  const scaleX = firstRect.width / lastRect.width;
+  const scaleY = firstRect.height / lastRect.height;
+  const dx = firstCenterX - finalCenterX;
+  const dy = firstCenterY - finalCenterY;
+
+  card.style.transition = 'none';
+  card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+  card.getBoundingClientRect(); // força o reflow antes de animar
+
+  requestAnimationFrame(() => {
+    card.style.transition = 'transform 0.38s cubic-bezier(0.22, 0.9, 0.25, 1), box-shadow 0.3s ease';
+    card.style.transform = 'translate(-50%, -50%)';
+  });
+
+  if (backdrop) backdrop.classList.add('show');
+
+  expandedState = { card, placeholder };
+  document.addEventListener('keydown', onEscKey);
+}
+
+function closeExpand(){
+  if (!expandedState) return;
+  const { card, placeholder } = expandedState;
+  const grid = document.getElementById('groups-grid');
+  const backdrop = document.getElementById('overlay-backdrop');
+
+  const curRect = card.getBoundingClientRect();
+  const targetRect = placeholder.getBoundingClientRect();
+  const targetCenterX = targetRect.left + targetRect.width / 2;
+  const targetCenterY = targetRect.top + targetRect.height / 2;
+  const curCenterX = window.innerWidth / 2;
+  const curCenterY = window.innerHeight / 2;
+  const scaleX = targetRect.width / curRect.width;
+  const scaleY = targetRect.height / curRect.height;
+  const dx = targetCenterX - curCenterX;
+  const dy = targetCenterY - curCenterY;
+
+  card.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease';
+  card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+
+  if (backdrop) backdrop.classList.remove('show');
+
+  const onEnd = (e) => {
+    if (e && e.target !== card) return;
+    card.classList.remove('expanded');
+    card.style.transition = '';
+    card.style.transform = '';
+    grid.classList.remove('has-expanded');
+    placeholder.parentNode.insertBefore(card, placeholder);
+    placeholder.remove();
+    card.removeEventListener('transitionend', onEnd);
+    document.removeEventListener('keydown', onEscKey);
+    expandedState = null;
+  };
+  card.addEventListener('transitionend', onEnd);
+}
+
+function onEscKey(e){
+  if (e.key === 'Escape') closeExpand();
 }
 
 function handleRefreshClick(){
