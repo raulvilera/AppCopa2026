@@ -273,7 +273,7 @@
     <div class="update-panel">
       <div class="last-update">
         <span>Última atualização</span>
-        <strong id="update-time">21 jun 2026, dados pós-rodada</strong>
+        <strong id="update-time">21 jun 2026, dados pós-rodada 2</strong>
       </div>
       <button id="refresh-btn" onclick="handleRefreshClick()">
         <span class="flip-icon"></span>
@@ -385,16 +385,16 @@ const standings = {
     {team:"Tunísia", abbr:"TUN", w:0,d:0,l:2,pts:0,gp:0,gc:4},
   ],
   G: [
+    {team:"Irã", abbr:"IRN", w:0,d:2,l:0,pts:2,gp:0,gc:0},
+    {team:"Bélgica", abbr:"BEL", w:0,d:2,l:0,pts:2,gp:0,gc:0},
     {team:"Nova Zelândia", abbr:"NZL", w:0,d:1,l:0,pts:1,gp:0,gc:0},
-    {team:"Irã", abbr:"IRN", w:0,d:1,l:0,pts:1,gp:0,gc:0},
-    {team:"Bélgica", abbr:"BEL", w:0,d:1,l:0,pts:1,gp:0,gc:0},
     {team:"Egito", abbr:"EGY", w:0,d:1,l:0,pts:1,gp:0,gc:0},
   ],
   H: [
-    {team:"Uruguai", abbr:"URU", w:0,d:1,l:0,pts:1,gp:0,gc:0},
-    {team:"Arábia Saudita", abbr:"KSA", w:0,d:1,l:0,pts:1,gp:0,gc:0},
-    {team:"Espanha", abbr:"ESP", w:0,d:1,l:0,pts:1,gp:0,gc:0},
-    {team:"Cabo Verde", abbr:"CPV", w:0,d:1,l:0,pts:1,gp:0,gc:0},
+    {team:"Espanha", abbr:"ESP", w:1,d:1,l:0,pts:4,gp:4,gc:0},
+    {team:"Uruguai", abbr:"URU", w:0,d:2,l:0,pts:2,gp:2,gc:2},
+    {team:"Cabo Verde", abbr:"CPV", w:0,d:2,l:0,pts:2,gp:2,gc:2},
+    {team:"Arábia Saudita", abbr:"KSA", w:0,d:1,l:1,pts:1,gp:0,gc:4},
   ],
   I: [
     {team:"Noruega", abbr:"NOR", w:1,d:0,l:0,pts:3,gp:4,gc:1},
@@ -423,22 +423,32 @@ const standings = {
 };
 
 const recentMatches = [
-  {group:"H", home:"Uruguai", away:"Cabo Verde", status:"PRÓX · 21/06 19h"},
-  {group:"G", home:"Nova Zelândia", away:"Egito", status:"PRÓX · 21/06 22h"},
-  {group:"H", home:"Espanha", away:"Ar. Saudita", status:"PRÓX · 21/06 13h"},
-  {group:"G", home:"Bélgica", away:"Irã", status:"PRÓX · 21/06 16h"},
+  {group:"D", home:"Suíça", away:"Canadá", status:"PRÓX · 24/06 16h"},
+  {group:"K", home:"Colômbia", away:"Congo (RD)", status:"PRÓX · 23/06 23h"},
+  {group:"L", home:"Panamá", away:"Croácia", status:"PRÓX · 23/06 20h"},
+  {group:"L", home:"Inglaterra", away:"Gana", status:"PRÓX · 23/06 17h"},
+  {group:"K", home:"Portugal", away:"Uzbequistão", status:"PRÓX · 23/06 14h"},
+  {group:"J", home:"Jordânia", away:"Argélia", status:"PRÓX · 22/06 21h"},
+  {group:"I", home:"Noruega", away:"Senegal", status:"PRÓX · 22/06 21h"},
+  {group:"I", home:"França", away:"Iraque", status:"PRÓX · 22/06 18h"},
+  {group:"J", home:"Argentina", away:"Áustria", status:"PRÓX · 22/06 14h"},
+  {group:"H", home:"Uruguai", away:"Cabo Verde", hs:2, as:2, status:"FINAL"},
+  {group:"G", home:"Bélgica", away:"Irã", hs:0, as:0, status:"FINAL"},
+  {group:"H", home:"Espanha", away:"Ar. Saudita", hs:4, as:0, status:"FINAL"},
+  {group:"G", home:"Nova Zelândia", away:"Egito", status:"AO VIVO", live:true},
   {group:"F", home:"Tunísia", away:"Japão", hs:0, as:4, status:"FINAL"},
   {group:"E", home:"Equador", away:"Curaçao", hs:0, as:0, status:"FINAL"},
   {group:"E", home:"Alemanha", away:"Costa do Marfim", hs:2, as:1, status:"FINAL"},
   {group:"F", home:"Países Baixos", away:"Suécia", hs:5, as:1, status:"FINAL"},
   {group:"D", home:"Turquia", away:"Paraguai", hs:0, as:1, status:"FINAL"},
   {group:"C", home:"Brasil", away:"Haiti", hs:3, as:0, status:"FINAL"},
+  {group:"C", home:"Escócia", away:"Marrocos", hs:0, as:1, status:"FINAL"},
 ];
 
 function renderMatches(){
   const row = document.getElementById('matches-row');
   row.innerHTML = recentMatches.map(m => {
-    const isLive = m.status === "LIVE";
+    const isLive = !!m.live;
     const hasScore = m.hs !== undefined;
     return `
       <div class="match-card ${isLive ? 'live' : ''}">
