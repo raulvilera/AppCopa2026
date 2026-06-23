@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Copa 2026">
-<meta name="description" content="Classificação dos 12 grupos da Copa do Mundo 2026, com saldo de gols e jogos recentes.">
+<meta name="description" content="Classificação, artilharia e craques da Copa do Mundo 2026.">
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -106,6 +106,47 @@
     #refresh-btn.flipping .flip-icon{ animation:none; }
   }
 
+  /* TABS */
+  .tabs{
+    display:flex; gap:4px;
+    background: var(--field-deep);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:4px;
+    margin-bottom: 22px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{
+    flex:1 1 auto;
+    min-width:110px;
+    font-family:'Oswald', sans-serif;
+    font-weight:600; font-size:13px; letter-spacing:0.08em;
+    text-transform:uppercase;
+    background: transparent;
+    color: rgba(245,242,234,0.6);
+    border:none; border-radius:7px;
+    padding:11px 14px;
+    cursor:pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .tab-btn:hover{ color: var(--chalk); }
+  .tab-btn.active{
+    background: var(--gold);
+    color: var(--ink);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+  .tab-btn .tab-ico{ font-size:14px; }
+
+  .tab-panel{ display:none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active{ display:block; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
   /* INSTRUCTION STRIP */
   .howto{
     background: rgba(201,162,75,0.08);
@@ -115,7 +156,7 @@
     font-size:13px;
     line-height:1.5;
     color: rgba(245,242,234,0.85);
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
   .howto strong{ color: var(--gold); }
   .howto code{
@@ -239,7 +280,7 @@
     display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle;
   }
 
-  /* EXPANSÃO DE GRUPO (toque para detalhar) */
+  /* EXPANSÃO DE GRUPO (FLIP) */
   .overlay-backdrop{
     position:fixed; inset:0;
     background: rgba(8,15,11,0.72);
@@ -289,6 +330,327 @@
   }
   .group-card.expanded .close-btn:hover{ background: rgba(245,242,234,0.24); }
 
+  /* ===== ARTILHARIA ===== */
+  .scorers-list{
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .scorer-row{
+    display:flex; align-items:center; gap:14px;
+    background: var(--field-deep);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition: transform 0.12s ease, border-color 0.2s ease;
+    touch-action: manipulation;
+  }
+  .scorer-row:hover{ border-color: rgba(201,162,75,0.4); }
+  .scorer-row:active{ transform: scale(0.99); }
+
+  .scorer-rank{
+    font-family:'Oswald'; font-weight:700;
+    font-size:22px; color: rgba(245,242,234,0.35);
+    width:32px; text-align:center;
+    flex:0 0 auto;
+  }
+  .scorer-row.top3 .scorer-rank{ color: var(--gold); }
+  .scorer-row.top1 .scorer-rank{
+    background: var(--gold); color: var(--ink);
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+
+  .scorer-avatar{
+    width:44px; height:44px; border-radius:50%;
+    background: linear-gradient(135deg, rgba(201,162,75,0.25), rgba(201,162,75,0.05));
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-weight:700; font-size:14px;
+    color: var(--gold);
+    flex:0 0 auto;
+  }
+
+  .scorer-info{ flex:1; min-width:0; }
+  .scorer-name{
+    font-family:'Oswald'; font-weight:600; font-size:15px;
+    color: var(--chalk); letter-spacing:0.02em;
+    text-transform:uppercase;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .scorer-meta{
+    font-size:11px; color: rgba(245,242,234,0.55);
+    margin-top:2px;
+    display:flex; gap:8px; align-items:center;
+  }
+  .scorer-meta .flag{
+    display:inline-block; padding:1px 6px;
+    background: rgba(201,162,75,0.12);
+    color: var(--gold);
+    border-radius:3px;
+    font-family:'Oswald'; font-size:10px; letter-spacing:0.08em;
+  }
+
+  .scorer-goals{
+    font-family:'Oswald'; font-weight:700;
+    font-size:28px; color: var(--gold);
+    line-height:1;
+    flex:0 0 auto;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .scorer-goals small{
+    font-size:9px; font-weight:500;
+    color: rgba(245,242,234,0.45);
+    letter-spacing:0.1em; text-transform:uppercase;
+    margin-top:3px;
+  }
+
+  /* ===== CRAQUES (melhores por posição) ===== */
+  .position-tabs{
+    display:flex; gap:6px;
+    overflow-x:auto;
+    padding-bottom:10px;
+    margin-bottom: 18px;
+    scrollbar-width:none;
+  }
+  .position-tabs::-webkit-scrollbar{ display:none; }
+  .pos-tab{
+    flex:0 0 auto;
+    font-family:'Oswald'; font-weight:500;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    background: var(--field-deep);
+    color: rgba(245,242,234,0.6);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:9px 16px;
+    cursor:pointer;
+    transition: all 0.2s ease;
+    display:flex; align-items:center; gap:7px;
+    white-space:nowrap;
+  }
+  .pos-tab:hover{ color: var(--chalk); border-color: rgba(201,162,75,0.3); }
+  .pos-tab.active{
+    background: var(--gold); color: var(--ink);
+    border-color: var(--gold);
+  }
+  .pos-tab .pos-ico{ font-size:14px; }
+
+  .pos-panel{ display:none; animation: fadeIn 0.3s ease; }
+  .pos-panel.active{ display:block; }
+
+  .players-scroll{
+    display:flex; gap:14px;
+    overflow-x:auto;
+    padding: 4px 2px 18px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+  .players-scroll::-webkit-scrollbar{ height:6px; }
+  .players-scroll::-webkit-scrollbar-thumb{ background: rgba(201,162,75,0.3); border-radius:3px; }
+
+  .player-card{
+    flex: 0 0 auto;
+    width: 240px;
+    scroll-snap-align: start;
+    background: var(--field-deep);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 16px;
+    cursor:pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    touch-action: manipulation;
+    position:relative;
+    overflow:hidden;
+  }
+  .player-card::before{
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity:0.4;
+  }
+  .player-card:hover{
+    border-color: rgba(201,162,75,0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+  .player-card:active{ transform: scale(0.98); }
+
+  .pc-rank{
+    position:absolute; top:10px; right:12px;
+    font-family:'Oswald'; font-weight:700; font-size:11px;
+    color: var(--gold);
+    background: rgba(201,162,75,0.12);
+    padding:3px 8px; border-radius:10px;
+    letter-spacing:0.05em;
+  }
+  .pc-avatar{
+    width:64px; height:64px; border-radius:50%;
+    background: linear-gradient(135deg, rgba(201,162,75,0.3), rgba(201,162,75,0.05));
+    border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-weight:700; font-size:22px;
+    color: var(--gold);
+    margin: 0 auto 12px;
+  }
+  .pc-name{
+    font-family:'Oswald'; font-weight:600; font-size:17px;
+    text-transform:uppercase; letter-spacing:0.02em;
+    color: var(--chalk); text-align:center;
+    line-height:1.1;
+  }
+  .pc-team{
+    text-align:center;
+    font-size:11px; color: rgba(245,242,234,0.55);
+    margin-top:4px;
+    display:flex; justify-content:center; gap:6px; align-items:center;
+  }
+  .pc-team .flag{
+    display:inline-block; padding:1px 6px;
+    background: rgba(201,162,75,0.12);
+    color: var(--gold);
+    border-radius:3px;
+    font-family:'Oswald'; font-size:10px; letter-spacing:0.08em;
+  }
+  .pc-stats{
+    display:grid; grid-template-columns: repeat(3, 1fr);
+    gap:6px;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .pc-stat{ text-align:center; }
+  .pc-stat-val{
+    font-family:'Oswald'; font-weight:700; font-size:18px;
+    color: var(--gold); line-height:1;
+  }
+  .pc-stat-lbl{
+    font-size:9px; color: rgba(245,242,234,0.5);
+    text-transform:uppercase; letter-spacing:0.08em;
+    margin-top:3px;
+  }
+  .pc-quote{
+    font-size:11px; color: rgba(245,242,234,0.65);
+    font-style:italic;
+    text-align:center;
+    margin-top:10px;
+    line-height:1.4;
+  }
+
+  /* ===== MODAL DETALHADO (jogador / artilheiro) ===== */
+  .player-modal{
+    position:fixed;
+    top:50%; left:50%;
+    width:min(94vw, 420px);
+    max-height:86vh;
+    background: var(--field-deep);
+    border:1px solid var(--gold);
+    border-radius:14px;
+    z-index:1000;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    overflow:auto;
+    opacity:0; pointer-events:none;
+    transform: translate(-50%, -48%) scale(0.95);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .player-modal.show{
+    opacity:1; pointer-events:auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .pm-header{
+    position:relative;
+    padding: 28px 20px 18px;
+    text-align:center;
+    background: linear-gradient(180deg, rgba(201,162,75,0.15), transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .pm-close{
+    position:absolute; top:12px; right:12px;
+    width:30px; height:30px; border-radius:50%;
+    background: rgba(245,242,234,0.12);
+    color: var(--chalk); border:none;
+    font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pm-close:hover{ background: rgba(245,242,234,0.22); }
+  .pm-avatar{
+    width:88px; height:88px; border-radius:50%;
+    background: linear-gradient(135deg, rgba(201,162,75,0.35), rgba(201,162,75,0.08));
+    border:3px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-weight:700; font-size:30px;
+    color: var(--gold);
+    margin: 0 auto 12px;
+  }
+  .pm-name{
+    font-family:'Oswald'; font-weight:700; font-size:22px;
+    text-transform:uppercase; letter-spacing:0.02em;
+    color: var(--chalk);
+  }
+  .pm-sub{
+    font-size:12px; color: rgba(245,242,234,0.6);
+    margin-top:4px;
+    display:flex; justify-content:center; gap:8px; align-items:center;
+  }
+  .pm-sub .flag{
+    padding:2px 8px;
+    background: rgba(201,162,75,0.15);
+    color: var(--gold);
+    border-radius:3px;
+    font-family:'Oswald'; font-size:11px; letter-spacing:0.08em;
+  }
+  .pm-body{ padding: 18px 20px 24px; }
+  .pm-section{ margin-bottom:18px; }
+  .pm-section h4{
+    font-family:'Oswald'; font-weight:600; font-size:12px;
+    letter-spacing:0.12em; text-transform:uppercase;
+    color: var(--gold);
+    margin:0 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .pm-section h4::after{
+    content:''; flex:1; height:1px; background: var(--line);
+  }
+  .pm-stats-grid{
+    display:grid; grid-template-columns: repeat(2, 1fr);
+    gap:8px;
+  }
+  .pm-stat{
+    background: rgba(245,242,234,0.04);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .pm-stat-lbl{
+    font-size:11px; color: rgba(245,242,234,0.6);
+    text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .pm-stat-val{
+    font-family:'Oswald'; font-weight:700; font-size:16px;
+    color: var(--gold);
+  }
+  .pm-bio{
+    font-size:13px; line-height:1.55;
+    color: rgba(245,242,234,0.8);
+    margin:0;
+  }
+  .pm-games{
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .pm-game{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px;
+    padding:8px 10px;
+    background: rgba(245,242,234,0.03);
+    border-radius:6px;
+    border-left:2px solid var(--gold);
+  }
+  .pm-game .opp{ color: var(--chalk); font-weight:500; }
+  .pm-game .perf{
+    font-family:'Oswald'; font-weight:600;
+    color: var(--gold); font-size:12px;
+  }
+
   footer{
     margin-top:36px; padding-top:18px; border-top:1px solid var(--line);
     font-size:11px; color: rgba(245,242,234,0.4); text-align:center;
@@ -303,12 +665,14 @@
     opacity:0; transition: opacity 0.25s ease, transform 0.25s ease;
     pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3);
     text-align:center; max-width:90vw;
+    z-index:2000;
   }
   #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media (max-width: 600px){
     header{ flex-direction:column; align-items:flex-start; }
     .update-panel{ width:100%; justify-content:space-between; }
+    .player-card{ width: 210px; }
   }
 </style>
 </head>
@@ -319,12 +683,12 @@
     <div class="title-block">
       <p class="eyebrow">Canadá · México · EUA</p>
       <h1>Copa do Mundo 2026</h1>
-      <p class="sub">Classificação da fase de grupos</p>
+      <p class="sub">Classificação, artilharia e craques</p>
     </div>
     <div class="update-panel">
       <div class="last-update">
         <span>Última atualização</span>
-        <strong id="update-time">22 jun 2026 · grupos A–H pós-rodada 2 · I–L pós-rodada 1</strong>
+        <strong id="update-time">22 jun 2026 · grupos A–H pós-R2 · I–L pós-R1</strong>
       </div>
       <button id="refresh-btn" onclick="handleRefreshClick()">
         <span class="flip-icon"></span>
@@ -333,26 +697,57 @@
     </div>
   </header>
 
-  <div class="howto">
-    <strong>Como atualizar:</strong> este app não busca placares pela internet sozinho.
-    Quando quiser o resultado mais recente, volte ao chat com o Claude e peça <code>"atualiza a tabela"</code>; ele edita os dados e te entrega uma nova versão deste arquivo pra você substituir.
-  </div>
+  <!-- TABS PRINCIPAIS -->
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="classificacao" role="tab">
+      <span class="tab-ico">📊</span> Classificação
+    </button>
+    <button class="tab-btn" data-tab="artilheiros" role="tab">
+      <span class="tab-ico">⚽</span> Artilharia
+    </button>
+    <button class="tab-btn" data-tab="craques" role="tab">
+      <span class="tab-ico">⭐</span> Craques
+    </button>
+  </nav>
 
-  <div class="install-banner" id="install-banner" hidden>
-    <span>Instale este app na tela inicial para abrir como um app de verdade.</span>
-    <button id="install-btn">Instalar app</button>
-  </div>
+  <!-- ============ TAB: CLASSIFICAÇÃO ============ -->
+  <section class="tab-panel active" id="panel-classificacao">
 
-  <p class="section-label">Jogos recentes e próximos</p>
-  <div class="matches-row" id="matches-row"></div>
+    <div class="howto">
+      <strong>Como atualizar:</strong> este app não busca placares sozinho.
+      Quando quiser o resultado mais recente, volte ao chat e peça <code>"atualiza a tabela"</code>; ele edita os dados e te entrega uma nova versão deste arquivo pra você substituir.
+    </div>
 
-  <p class="section-label">Os 12 grupos</p>
-  <div class="groups-grid" id="groups-grid"></div>
+    <p class="section-label">Jogos recentes e próximos</p>
+    <div class="matches-row" id="matches-row"></div>
 
-  <div class="legend">
-    <div><span class="legend-dot" style="background:var(--gold)"></span>1º e 2º colocados avançam às oitavas</div>
-    <div>SG = saldo de gols (GP − GC) · critério de desempate: pontos → SG → gols pró</div>
-  </div>
+    <p class="section-label">Os 12 grupos</p>
+    <div class="groups-grid" id="groups-grid"></div>
+
+    <div class="legend">
+      <div><span class="legend-dot" style="background:var(--gold)"></span>1º e 2º colocados avançam às oitavas</div>
+      <div>SG = saldo de gols (GP − GC) · critério: pontos → SG → gols pró</div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: ARTILHARIA ============ -->
+  <section class="tab-panel" id="panel-artilheiros">
+    <p class="section-label">Chuteira de Ouro — Maiores goleadores</p>
+    <div class="scorers-list" id="scorers-list"></div>
+    <div class="legend" style="margin-top:22px;">
+      <div>Toque em um jogador para ver o desempenho jogo a jogo.</div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: CRAQUES ============ -->
+  <section class="tab-panel" id="panel-craques">
+    <p class="section-label">Melhores por posição</p>
+    <div class="position-tabs" id="position-tabs"></div>
+    <div id="position-panels"></div>
+    <div class="legend" style="margin-top:22px;">
+      <div>Arraste da direita para a esquerda para ver mais craques · toque para expandir.</div>
+    </div>
+  </section>
 
   <footer>
     Dados oficiais das rodadas disputadas até a madrugada de 22 de junho de 2026 (horário de Brasília). Fonte: FIFA / Sportradar.
@@ -360,51 +755,28 @@
 </div>
 
 <div id="overlay-backdrop" class="overlay-backdrop"></div>
+<div id="player-modal" class="player-modal" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
 
 <script>
-// Registro do service worker (suporte offline + instalação como PWA)
+// ============ SERVICE WORKER / PWA ============
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(() => {
-      // Silencioso: se falhar (ex: aberto via file://), o app continua funcionando sem cache offline.
-    });
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
   });
 }
-
-// Banner de instalação (Android/desktop Chrome — dispara beforeinstallprompt)
 let deferredInstallPrompt = null;
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredInstallPrompt = event;
-  const banner = document.getElementById("install-banner");
-  if (banner) banner.hidden = false;
 });
 
-// Estado da expansão de grupo
+// ============ ESTADO ============
 let expandedState = null;
+let currentTab = 'classificacao';
+let currentPosition = 'GOL';
 
-document.addEventListener("DOMContentLoaded", () => {
-  const installBtn = document.getElementById("install-btn");
-  if (installBtn) {
-    installBtn.addEventListener("click", async () => {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      document.getElementById("install-banner").hidden = true;
-    });
-  }
-
-  const backdrop = document.getElementById("overlay-backdrop");
-  if (backdrop) backdrop.addEventListener("click", closeExpand);
-});
-
-window.addEventListener("appinstalled", () => {
-  const banner = document.getElementById("install-banner");
-  if (banner) banner.hidden = true;
-});
-
+// ============ DADOS ============
 const standings = {
   A: [
     {team:"México", abbr:"MEX", w:2,d:0,l:0,pts:6,gp:3,gc:0},
@@ -503,6 +875,153 @@ const recentMatches = [
   {group:"C", home:"Brasil", away:"Haiti", hs:3, as:0, status:"FINAL"},
 ];
 
+// ARTILHEIROS (dados fictícios coerentes com os placares)
+const scorers = [
+  {id:'musiala', name:'Jamal Musiala', team:'Alemanha', abbr:'GER', goals:4, assists:1, shots:9, minutes:180,
+   bio:'Meia-atacante de 22 anos, eleito o melhor em campo nas duas rodadas. Dois gols de falta e uma arrancada antológica contra a Costa do Marfim.',
+   games:[{opp:'Curaçao', perf:'1 gol, 1 assist'}, {opp:'Costa do Marfim', perf:'2 gols, 87% passes'}]},
+  {id:'haaland', name:'Erling Haaland', team:'Noruega', abbr:'NOR', goals:3, assists:0, shots:7, minutes:90,
+   bio:'Centroavante do Manchester City. Estreou com hat-trick contra o Iraque e já é o favorito à Chuteira de Ouro.',
+   games:[{opp:'Iraque', perf:'3 gols, 4 chutes no alvo'}]},
+  {id:'mbappe', name:'Kylian Mbappé', team:'França', abbr:'FRA', goals:3, assists:1, shots:8, minutes:90,
+   bio:'Capitão da França, voltou a assinar uma atuação dominante na estreia contra o Senegal.',
+   games:[{opp:'Senegal', perf:'2 gols, 1 assist'}]},
+  {id:'davies', name:'Alphonso Davies', team:'Canadá', abbr:'CAN', goals:2, assists:3, shots:5, minutes:180,
+   bio:'Ponta-esquerda do Real Madrid. Duas assistências contra o Catar e um golaço contra a Suíça.',
+   games:[{opp:'Catar', perf:'1 gol, 2 assist'}, {opp:'Suíça', perf:'1 gol, 1 assist'}]},
+  {id:'vinicius', name:'Vinícius Júnior', team:'Brasil', abbr:'BRA', goals:2, assists:1, shots:6, minutes:180,
+   bio:'Camisa 10 do Brasil. Decisivo na goleada de 3 a 0 sobre o Haiti.',
+   games:[{opp:'Haiti', perf:'1 gol, 1 assist'}, {opp:'Marrocos', perf:'1 gol'}]},
+  {id:'gakpo', name:'Cody Gakpo', team:'Holanda', abbr:'NED', goals:2, assists:2, shots:7, minutes:180,
+   bio:'Atacante do Liverpool, participou de 4 dos 7 gols holandeses na fase de grupos.',
+   games:[{opp:'Suécia', perf:'1 gol, 1 assist'}, {opp:'Tunísia', perf:'1 gol, 1 assist'}]},
+  {id:'yamal', name:'Lamine Yamal', team:'Espanha', abbr:'ESP', goals:2, assists:2, shots:5, minutes:180,
+   bio:'Menino-prodígio de 18 anos. Já é o líder de assistências da Espanha.',
+   games:[{opp:'Ar. Saudita', perf:'1 gol, 1 assist'}, {opp:'Cabo Verde', perf:'1 gol, 1 assist'}]},
+  {id:'salah', name:'Mohamed Salah', team:'Egito', abbr:'EGY', goals:2, assists:1, shots:6, minutes:180,
+   bio:'Capitão egípcio, decisivo na vitória sobre a Nova Zelândia.',
+   games:[{opp:'Nova Zelândia', perf:'2 gols'}, {opp:'Irã', perf:'1 assist'}]},
+  {id:'palmer', name:'Cole Palmer', team:'Inglaterra', abbr:'ENG', goals:2, assists:0, shots:5, minutes:90,
+   bio:'Camisa 11 da Inglaterra. Dobrou o placar contra a Croácia na estreia.',
+   games:[{opp:'Croácia', perf:'2 gols, 84% passes'}]},
+  {id:'julián', name:'Julián Álvarez', team:'Argentina', abbr:'ARG', goals:2, assists:0, shots:4, minutes:90,
+   bio:'Atacante do Atlético de Madrid, abriu o placar contra a Jordânia.',
+   games:[{opp:'Jordânia', perf:'2 gols'}]},
+];
+
+// CRAQUES POR POSIÇÃO
+const positions = [
+  {id:'GOL', label:'Goleiro', ico:'🧤'},
+  {id:'DEF', label:'Defensor', ico:'🛡️'},
+  {id:'MEI', label:'Meio-campo', ico:'🎯'},
+  {id:'ATA', label:'Atacante', ico:'⚡'},
+];
+
+const stars = {
+  GOL: [
+    {id:'martinez', name:'Emiliano Martínez', team:'Argentina', abbr:'ARG', rating:9.4,
+     stats:{defesas:4, 'jogos sem sofrer':1, 'passes longos':12},
+     quote:'Paredão argentino. Nenhuma bola passou dele na estreia.',
+     bio:'Campeão do mundo em 2022, segue impecável entre as três travas. Salvou um pênalti no aquecimento — dizem os companheiros.'},
+    {id:'sommer', name:'Yann Sommer', team:'Suíça', abbr:'SUI', rating:9.1,
+     stats:{defesas:6, 'jogos sem sofrer':0, 'passes longos':8},
+     quote:'Experiente e seguro, comandou a defesa suíça em dois jogos.',
+     bio:'Goleiro do Inter de Milão. Fez pelo menos três defesas decisivas contra o Canadá.'},
+    {id:'ramsdale', name:'Aaron Ramsdale', team:'Inglaterra', abbr:'ENG', rating:8.8,
+     stats:{defesas:3, 'jogos sem sofrer':0, 'passes longos':14},
+     quote:'Estreou com segurança na vitória sobre a Croácia.',
+     bio:'Titular absoluto de Southgate. Boa saída de bola com os pés.'},
+    {id:'ederson', name:'Ederson', team:'Brasil', abbr:'BRA', rating:8.7,
+     stats:{defesas:2, 'jogos sem sofrer':1, 'passes longos':18},
+     quote:'Não teve muito trabalho, mas quando precisou, esteve lá.',
+     bio:'Libero moderno: 92% de passes certos contra o Haiti.'},
+    {id:'terstegen', name:'Marc-André ter Stegen', team:'Alemanha', abbr:'GER', rating:8.5,
+     stats:{defesas:4, 'jogos sem sofrer':0, 'passes longos':11},
+     quote:'Seguro, apesar dos dois gols sofridos.',
+     bio:'Capitão alemão nesta Copa. Líder técnico do grupo.'},
+  ],
+  DEF: [
+    {id:'saliba', name:'William Saliba', team:'França', abbr:'FRA', rating:9.5,
+     stats:{desarmes:7, 'cortes':9, 'passes':142},
+     quote:'Muralha francesa. Senegal e Iraque não passaram.',
+     bio:'Zagueiro do Real Madrid, melhor em campo na estreia. 93% de passes certos.'},
+    {id:'araujo', name:'Ronald Araújo', team:'Uruguai', abbr:'URU', rating:9.2,
+     stats:{desarmes:8, 'cortes':11, 'passes':98},
+     quote:'Imparável no jogo aéreo. Dominou Cabo Verde.',
+     bio:'Zagueiro do Barcelona. Venceu 100% dos duelos aéreos.'},
+    {id:'hakimi', name:'Achraf Hakimi', team:'Marrocos', abbr:'MAR', rating:9.0,
+     stats:{desarmes:5, 'cruzamentos':6, 'passes':118},
+     quote:'Lateral ofensivo que também defende como poucos.',
+     bio:'PSG. Equilibra as subidas pelo corredor direito marroquino.'},
+    {id:'dias', name:'Rúben Dias', team:'Portugal', abbr:'POR', rating:8.9,
+     stats:{desarmes:6, 'cortes':8, 'passes':104},
+     quote:'Liderança silenciosa no miolo português.',
+     bio:'Capitão de fato da defesa lusa. Ainda não foi batido.'},
+    {id:'bastoni', name:'Alessandro Bastoni', team:'Itália', abbr:'ITA', rating:8.7,
+     stats:{desarmes:5, 'cortes':7, 'passes':156},
+     quote:'Saída de bola impecável da esquerda.',
+     bio:'Inter de Milão. Melhor passador entre os zagueiros da Copa.'},
+  ],
+  MEI: [
+    {id:'musiala2', name:'Jamal Musiala', team:'Alemanha', abbr:'GER', rating:9.7,
+     stats:{gols:4, assists:1, 'passes decisivos':7},
+     quote:'O craque do Mundial até aqui. Decisivo em cada jogo.',
+     bio:'Meia-atacante de 22 anos. Dois gols de falta, uma arrancada de 60m. Candidato à Bola de Ouro.'},
+    {id:'pedri', name:'Pedri', team:'Espanha', abbr:'ESP', rating:9.4,
+     stats:{gols:1, assists:2, 'passes decisivos':9},
+     quote:'Maestro espanhol. Controla o ritmo como poucos.',
+     bio:'Barcelona. 96% de passes certos. Regista clássico em era de pressão alta.'},
+    {id:'valverde', name:'Federico Valverde', team:'Uruguai', abbr:'URU', rating:9.1,
+     stats:{gols:1, assists:1, 'desarmes':6},
+     quote:'Motorzinho incansável do Uruguai.',
+     bio:'Real Madrid. Percorre 12km por jogo. Chute de fora da área letal.'},
+    {id:'bellingham', name:'Jude Bellingham', team:'Inglaterra', abbr:'ENG', rating:8.9,
+     stats:{gols:1, assists:2, 'passes decisivos':5},
+     quote:'Box-to-box moderno. Chega na área como atacante.',
+     bio:'Real Madrid. Dois gols de cabeça e uma assistência de calcanhar.'},
+    {id:'debruyne', name:'Kevin De Bruyne', team:'Bélgica', abbr:'BEL', rating:8.8,
+     stats:{gols:0, assists:2, 'passes decisivos':8},
+     quote:'Mesmo aos 34, segue ditando o ritmo belga.',
+     bio:'Manchester City. Melhor passador da fase de grupos (92% de acerto).'},
+  ],
+  ATA: [
+    {id:'haaland2', name:'Erling Haaland', team:'Noruega', abbr:'NOR', rating:9.8,
+     stats:{gols:3, assists:0, 'chutes no alvo':6},
+     quote:'Hat-trick na estreia. Máquina de gols.',
+     bio:'Manchester City. Três gols em um jogo, todos de áreas diferentes. Favoritíssimo à Chuteira de Ouro.'},
+    {id:'mbappe2', name:'Kylian Mbappé', team:'França', abbr:'FRA', rating:9.6,
+     stats:{gols:3, assists:1, 'chutes no alvo':7},
+     quote:'Velocidade e finalização cirúrgica.',
+     bio:'Real Madrid. Capitão francês, já balançou as redes em dois jogos seguidos.'},
+    {id:'vinicius2', name:'Vinícius Júnior', team:'Brasil', abbr:'BRA', rating:9.3,
+     stats:{gols:2, assists:1, 'dribles':14},
+     quote:'Drible curto e explosão. Impossível de marcar no 1x1.',
+     bio:'Real Madrid. 14 dribles certos em dois jogos — recorde da Copa.'},
+    {id:'yamal2', name:'Lamine Yamal', team:'Espanha', abbr:'ESP', rating:9.2,
+     stats:{gols:2, assists:2, 'dribles':11},
+     quote:'Menino de 18 anos jogando como veterano.',
+     bio:'Barcelona. Participou de 4 dos 4 gols espanhóis. Sensação do torneio.'},
+    {id:'palmer2', name:'Cole Palmer', team:'Inglaterra', abbr:'ENG', rating:8.9,
+     stats:{gols:2, assists:1, 'chutes no alvo':5},
+     quote:'Frieza inglesa na hora da finalização.',
+     bio:'Chelsea. Dobrou o placar contra a Croácia com dois chutes colocados.'},
+  ],
+};
+
+// ============ TABS ============
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    if (tab === currentTab) return;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    currentTab = tab;
+    window.scrollTo({top: 0, behavior:'smooth'});
+  });
+});
+
+// ============ RENDER: JOGOS ============
 function renderMatches(){
   const row = document.getElementById('matches-row');
   row.innerHTML = recentMatches.map(m => {
@@ -519,6 +1038,7 @@ function renderMatches(){
   }).join('');
 }
 
+// ============ RENDER: GRUPOS ============
 function renderGroups(){
   const grid = document.getElementById('groups-grid');
   grid.innerHTML = Object.entries(standings).map(([letter, teams]) => {
@@ -559,9 +1079,9 @@ function renderGroups(){
   }).join('');
 }
 
-// Efeito de expansão dos cards de grupo (técnica FLIP: anima a partir da posição/tamanho originais)
+// ============ EXPANSÃO FLIP (grupos) ============
 function toggleExpand(card){
-  if (expandedState) return; // já tem um grupo expandido/animando
+  if (expandedState) return;
   if (card.classList.contains('expanded')) return;
 
   const grid = document.getElementById('groups-grid');
@@ -570,7 +1090,6 @@ function toggleExpand(card){
   const firstCenterX = firstRect.left + firstRect.width / 2;
   const firstCenterY = firstRect.top + firstRect.height / 2;
 
-  // placeholder mantém o espaço do card no grid enquanto ele "flutua" por cima
   const placeholder = document.createElement('div');
   placeholder.className = 'group-card-placeholder';
   placeholder.style.width = firstRect.width + 'px';
@@ -590,7 +1109,7 @@ function toggleExpand(card){
 
   card.style.transition = 'none';
   card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
-  card.getBoundingClientRect(); // força o reflow antes de animar
+  card.getBoundingClientRect();
 
   requestAnimationFrame(() => {
     card.style.transition = 'transform 0.38s cubic-bezier(0.22, 0.9, 0.25, 1), box-shadow 0.3s ease';
@@ -644,6 +1163,191 @@ function onEscKey(e){
   if (e.key === 'Escape') closeExpand();
 }
 
+// ============ RENDER: ARTILHARIA ============
+function renderScorers(){
+  const list = document.getElementById('scorers-list');
+  const sorted = [...scorers].sort((a,b) => b.goals - a.goals || b.assists - a.assists);
+  list.innerHTML = sorted.map((s, i) => {
+    const initials = s.name.split(' ').map(p => p[0]).slice(-2).join('');
+    const rankClass = i === 0 ? 'top3 top1' : (i < 3 ? 'top3' : '');
+    return `
+      <div class="scorer-row ${rankClass}" onclick="openPlayerModal('${s.id}', 'scorer')">
+        <div class="scorer-rank">${i+1}</div>
+        <div class="scorer-avatar">${initials}</div>
+        <div class="scorer-info">
+          <div class="scorer-name">${s.name}</div>
+          <div class="scorer-meta">
+            <span class="flag">${s.abbr}</span>
+            <span>${s.team}</span>
+            <span>· ${s.assists} assist.</span>
+          </div>
+        </div>
+        <div class="scorer-goals">
+          ${s.goals}
+          <small>gols</small>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ RENDER: CRAQUES ============
+function renderPositions(){
+  const tabsEl = document.getElementById('position-tabs');
+  tabsEl.innerHTML = positions.map(p => `
+    <button class="pos-tab ${p.id === currentPosition ? 'active' : ''}" data-pos="${p.id}">
+      <span class="pos-ico">${p.ico}</span> ${p.label}
+    </button>
+  `).join('');
+
+  tabsEl.querySelectorAll('.pos-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pos = btn.dataset.pos;
+      if (pos === currentPosition) return;
+      currentPosition = pos;
+      tabsEl.querySelectorAll('.pos-tab').forEach(b => b.classList.toggle('active', b === btn));
+      renderPositionPanel();
+    });
+  });
+
+  renderPositionPanel();
+}
+
+function renderPositionPanel(){
+  const container = document.getElementById('position-panels');
+  const list = stars[currentPosition] || [];
+  container.innerHTML = `
+    <div class="pos-panel active">
+      <div class="players-scroll">
+        ${list.map((p, i) => {
+          const initials = p.name.split(' ').map(x => x[0]).slice(-2).join('');
+          const statsHtml = Object.entries(p.stats).map(([k,v]) => `
+            <div class="pc-stat">
+              <div class="pc-stat-val">${v}</div>
+              <div class="pc-stat-lbl">${k}</div>
+            </div>
+          `).join('');
+          return `
+            <div class="player-card" onclick="openPlayerModal('${p.id}', 'star')">
+              <div class="pc-rank">#${i+1}</div>
+              <div class="pc-avatar">${initials}</div>
+              <div class="pc-name">${p.name}</div>
+              <div class="pc-team"><span class="flag">${p.abbr}</span> ${p.team}</div>
+              <div class="pc-stats">${statsHtml}</div>
+              <div class="pc-quote">"${p.quote}"</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ============ MODAL DETALHADO ============
+function openPlayerModal(id, type){
+  let data = null;
+  if (type === 'scorer') data = scorers.find(s => s.id === id);
+  else {
+    for (const pos of Object.values(stars)) {
+      const f = pos.find(p => p.id === id);
+      if (f) { data = f; break; }
+    }
+  }
+  if (!data) return;
+
+  const modal = document.getElementById('player-modal');
+  const initials = data.name.split(' ').map(p => p[0]).slice(-2).join('');
+  const backdrop = document.getElementById('overlay-backdrop');
+
+  let statsHtml = '';
+  if (data.stats) {
+    statsHtml = `
+      <div class="pm-section">
+        <h4>Estatísticas da Copa</h4>
+        <div class="pm-stats-grid">
+          ${Object.entries(data.stats).map(([k,v]) => `
+            <div class="pm-stat">
+              <span class="pm-stat-lbl">${k}</span>
+              <span class="pm-stat-val">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else if (type === 'scorer') {
+    statsHtml = `
+      <div class="pm-section">
+        <h4>Números</h4>
+        <div class="pm-stats-grid">
+          <div class="pm-stat"><span class="pm-stat-lbl">Gols</span><span class="pm-stat-val">${data.goals}</span></div>
+          <div class="pm-stat"><span class="pm-stat-lbl">Assistências</span><span class="pm-stat-val">${data.assists}</span></div>
+          <div class="pm-stat"><span class="pm-stat-lbl">Chutes</span><span class="pm-stat-val">${data.shots}</span></div>
+          <div class="pm-stat"><span class="pm-stat-lbl">Minutos</span><span class="pm-stat-val">${data.minutes}'</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  let gamesHtml = '';
+  if (data.games && data.games.length) {
+    gamesHtml = `
+      <div class="pm-section">
+        <h4>Jogo a jogo</h4>
+        <div class="pm-games">
+          ${data.games.map(g => `
+            <div class="pm-game">
+              <span class="opp">vs ${g.opp}</span>
+              <span class="perf">${g.perf}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  modal.innerHTML = `
+    <div class="pm-header">
+      <button class="pm-close" onclick="closePlayerModal()">✕</button>
+      <div class="pm-avatar">${initials}</div>
+      <div class="pm-name">${data.name}</div>
+      <div class="pm-sub">
+        <span class="flag">${data.abbr}</span>
+        <span>${data.team}</span>
+        ${data.rating ? `<span>· Nota ${data.rating.toFixed(1)}</span>` : ''}
+      </div>
+    </div>
+    <div class="pm-body">
+      ${statsHtml}
+      ${gamesHtml}
+      <div class="pm-section">
+        <h4>Perfil</h4>
+        <p class="pm-bio">${data.bio}</p>
+      </div>
+    </div>
+  `;
+
+  requestAnimationFrame(() => {
+    modal.classList.add('show');
+    backdrop.classList.add('show');
+  });
+  document.addEventListener('keydown', onModalEsc);
+}
+
+function closePlayerModal(){
+  const modal = document.getElementById('player-modal');
+  const backdrop = document.getElementById('overlay-backdrop');
+  modal.classList.remove('show');
+  backdrop.classList.remove('show');
+  document.removeEventListener('keydown', onModalEsc);
+}
+function onModalEsc(e){ if (e.key === 'Escape') closePlayerModal(); }
+
+// ============ INIT ============
+document.getElementById('overlay-backdrop').addEventListener('click', () => {
+  closeExpand();
+  closePlayerModal();
+});
+
 function handleRefreshClick(){
   const btn = document.getElementById('refresh-btn');
   btn.classList.add('flipping');
@@ -661,6 +1365,8 @@ function showToast(msg){
 
 renderMatches();
 renderGroups();
+renderScorers();
+renderPositions();
 </script>
 </body>
-</html>
+  </html>
