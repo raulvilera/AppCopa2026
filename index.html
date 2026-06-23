@@ -262,8 +262,18 @@
   td.pos{
     font-family:'Oswald'; font-weight:600; color: rgba(245,242,234,0.4); width:18px;
   }
-  tr.qualify td.pos{ color: var(--gold); }
-  tr.qualify{ background: rgba(201,162,75,0.06); }
+  tbody tr.row-a{ background: rgba(46,125,90,0.16); }
+  tbody tr.row-b{ background: rgba(45,90,140,0.16); }
+
+  tr.qualify td.pos{ color: var(--ink); }
+  tr.qualify{
+    background: linear-gradient(90deg, rgba(201,162,75,0.42), rgba(201,162,75,0.16));
+  }
+  tr.qualify.row-a{ background: linear-gradient(90deg, rgba(111,191,139,0.55), rgba(201,162,75,0.18)); }
+  tr.qualify.row-b{ background: linear-gradient(90deg, rgba(90,150,210,0.5), rgba(201,162,75,0.18)); }
+  tr.qualify td.team{ color: var(--ink); }
+  tr.qualify td.pts{ color: var(--ink); }
+  tr.qualify td.gf{ color: rgba(22,32,27,0.65); }
   td.team{ font-weight:600; }
   td.pts{ font-family:'Oswald'; font-weight:700; color: var(--gold); text-align:center; }
   td.gf{ color: rgba(245,242,234,0.55); }
@@ -1061,8 +1071,9 @@ function renderGroups(){
     const rows = sorted.map((t, i) => {
       const sg = t.gp - t.gc;
       const sgLabel = sg > 0 ? `+${sg}` : `${sg}`;
+      const stripe = i % 2 === 0 ? 'row-a' : 'row-b';
       return `
-      <tr class="${i < 2 ? 'qualify' : ''}">
+      <tr class="${stripe} ${i < 2 ? 'qualify' : ''}">
         <td class="pos">${i+1}</td>
         <td class="team">${t.team}</td>
         <td class="num">${t.w}</td>
