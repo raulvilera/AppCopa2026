@@ -688,7 +688,7 @@
     <div class="update-panel">
       <div class="last-update">
         <span>Última atualização</span>
-        <strong id="update-time">22 jun 2026 · grupos A–H pós-R2 · I–L pós-R1</strong>
+        <strong id="update-time">23 jun 2026 · A–H pós-R2 · I–J pós-R2 · K parcial (Por-Uzb) · L pós-R1</strong>
       </div>
       <button id="refresh-btn" onclick="handleRefreshClick()">
         <span class="flip-icon"></span>
@@ -750,7 +750,7 @@
   </section>
 
   <footer>
-    Dados oficiais das rodadas disputadas até a madrugada de 22 de junho de 2026 (horário de Brasília). Fonte: FIFA / Sportradar.
+    Dados oficiais das rodadas disputadas até a manhã de 23 de junho de 2026 (horário de Brasília). Fonte: FIFA / Sportradar.
   </footer>
 </div>
 
@@ -827,22 +827,22 @@ const standings = {
     {team:"Arábia Saudita", abbr:"KSA", w:0,d:1,l:1,pts:1,gp:1,gc:5},
   ],
   I: [
-    {team:"Noruega", abbr:"NOR", w:1,d:0,l:0,pts:3,gp:4,gc:1},
-    {team:"França", abbr:"FRA", w:1,d:0,l:0,pts:3,gp:3,gc:1},
-    {team:"Senegal", abbr:"SEN", w:0,d:0,l:1,pts:0,gp:1,gc:3},
-    {team:"Iraque", abbr:"IRQ", w:0,d:0,l:1,pts:0,gp:1,gc:4},
+    {team:"França", abbr:"FRA", w:2,d:0,l:0,pts:6,gp:6,gc:1},
+    {team:"Noruega", abbr:"NOR", w:2,d:0,l:0,pts:6,gp:7,gc:3},
+    {team:"Senegal", abbr:"SEN", w:0,d:0,l:2,pts:0,gp:3,gc:6},
+    {team:"Iraque", abbr:"IRQ", w:0,d:0,l:2,pts:0,gp:1,gc:7},
   ],
   J: [
-    {team:"Argentina", abbr:"ARG", w:1,d:0,l:0,pts:3,gp:3,gc:0},
-    {team:"Áustria", abbr:"AUT", w:1,d:0,l:0,pts:3,gp:3,gc:1},
-    {team:"Jordânia", abbr:"JOR", w:0,d:0,l:1,pts:0,gp:1,gc:3},
-    {team:"Argélia", abbr:"DZA", w:0,d:0,l:1,pts:0,gp:0,gc:3},
+    {team:"Argentina", abbr:"ARG", w:2,d:0,l:0,pts:6,gp:5,gc:0},
+    {team:"Áustria", abbr:"AUT", w:1,d:0,l:1,pts:3,gp:3,gc:3},
+    {team:"Argélia", abbr:"DZA", w:1,d:0,l:1,pts:3,gp:2,gc:4},
+    {team:"Jordânia", abbr:"JOR", w:0,d:0,l:2,pts:0,gp:2,gc:5},
   ],
   K: [
+    {team:"Portugal", abbr:"POR", w:1,d:1,l:0,pts:4,gp:6,gc:1},
     {team:"Colômbia", abbr:"COL", w:1,d:0,l:0,pts:3,gp:3,gc:1},
     {team:"Congo (RD)", abbr:"COD", w:0,d:1,l:0,pts:1,gp:1,gc:1},
-    {team:"Portugal", abbr:"POR", w:0,d:1,l:0,pts:1,gp:1,gc:1},
-    {team:"Uzbequistão", abbr:"UZB", w:0,d:0,l:1,pts:0,gp:1,gc:3},
+    {team:"Uzbequistão", abbr:"UZB", w:0,d:0,l:2,pts:0,gp:1,gc:8},
   ],
   L: [
     {team:"Inglaterra", abbr:"ENG", w:1,d:0,l:0,pts:3,gp:4,gc:2},
@@ -853,39 +853,42 @@ const standings = {
 };
 
 const recentMatches = [
-  {group:"B", home:"Suíça", away:"Canadá", status:"PRÓX · 24/06 20h"},
-  {group:"B", home:"Bósnia e Herzegovina", away:"Catar", status:"PRÓX · 24/06 20h"},
-  {group:"K", home:"Colômbia", away:"Congo (RD)", status:"PRÓX · 24/06 03h"},
   {group:"L", home:"Panamá", away:"Croácia", status:"PRÓX · 24/06 00h"},
   {group:"L", home:"Inglaterra", away:"Gana", status:"PRÓX · 23/06 21h"},
-  {group:"K", home:"Portugal", away:"Uzbequistão", status:"PRÓX · 23/06 18h"},
-  {group:"J", home:"Jordânia", away:"Argélia", status:"PRÓX · 23/06 04h"},
-  {group:"I", home:"Noruega", away:"Senegal", status:"PRÓX · 23/06 01h"},
-  {group:"I", home:"França", away:"Iraque", status:"PRÓX · 22/06 22h"},
-  {group:"J", home:"Argentina", away:"Áustria", status:"PRÓX · 22/06 18h"},
+  {group:"K", home:"Colômbia", away:"Congo (RD)", status:"PRÓX · 23/06 23h"},
+  {group:"B", home:"Suíça", away:"Canadá", status:"PRÓX · 24/06 20h"},
+  {group:"B", home:"Bósnia e Herzegovina", away:"Catar", status:"PRÓX · 24/06 20h"},
+  {group:"C", home:"Escócia", away:"Brasil", status:"PRÓX · 24/06 23h"},
+  {group:"C", home:"Marrocos", away:"Haiti", status:"PRÓX · 24/06 23h"},
+  {group:"A", home:"Tchéquia", away:"México", status:"PRÓX · 25/06 02h"},
+  {group:"A", home:"África do Sul", away:"Coreia do Sul", status:"PRÓX · 25/06 02h"},
+  {group:"K", home:"Portugal", away:"Uzbequistão", hs:5, as:0, status:"FINAL"},
+  {group:"J", home:"Argentina", away:"Áustria", hs:2, as:0, status:"FINAL"},
+  {group:"J", home:"Jordânia", away:"Argélia", hs:1, as:2, status:"FINAL"},
+  {group:"I", home:"França", away:"Iraque", hs:3, as:0, status:"FINAL"},
+  {group:"I", home:"Noruega", away:"Senegal", hs:3, as:2, status:"FINAL"},
   {group:"G", home:"Nova Zelândia", away:"Egito", hs:1, as:3, status:"FINAL"},
   {group:"H", home:"Uruguai", away:"Cabo Verde", hs:2, as:2, status:"FINAL"},
-  {group:"G", home:"Bélgica", away:"Irã", hs:0, as:0, status:"FINAL"},
   {group:"H", home:"Espanha", away:"Ar. Saudita", hs:4, as:0, status:"FINAL"},
   {group:"F", home:"Tunísia", away:"Japão", hs:0, as:4, status:"FINAL"},
-  {group:"E", home:"Equador", away:"Curaçao", hs:0, as:0, status:"FINAL"},
   {group:"E", home:"Alemanha", away:"Costa do Marfim", hs:2, as:1, status:"FINAL"},
-  {group:"F", home:"Holanda", away:"Suécia", hs:5, as:1, status:"FINAL"},
   {group:"D", home:"Turquia", away:"Paraguai", hs:0, as:1, status:"FINAL"},
-  {group:"C", home:"Brasil", away:"Haiti", hs:3, as:0, status:"FINAL"},
 ];
 
-// ARTILHEIROS (dados fictícios coerentes com os placares)
+// ARTILHEIROS
 const scorers = [
+  {id:'haaland', name:'Erling Haaland', team:'Noruega', abbr:'NOR', goals:5, assists:0, shots:13, minutes:180,
+   bio:'Centroavante do Manchester City. Hat-trick na estreia contra o Iraque e mais 2 gols na vitória sobre o Senegal. Disparado na briga pela Chuteira de Ouro.',
+   games:[{opp:'Iraque', perf:'3 gols'}, {opp:'Senegal', perf:'2 gols'}]},
+  {id:'mbappe', name:'Kylian Mbappé', team:'França', abbr:'FRA', goals:4, assists:1, shots:11, minutes:180,
+   bio:'Capitão da França. Dois gols na estreia contra o Senegal e mais dois na vitória sobre o Iraque, que garantiu vaga antecipada nas oitavas. Já é o vice-artilheiro histórico de Copas, atrás só de Messi.',
+   games:[{opp:'Senegal', perf:'2 gols, 1 assist'}, {opp:'Iraque', perf:'2 gols'}]},
   {id:'musiala', name:'Jamal Musiala', team:'Alemanha', abbr:'GER', goals:4, assists:1, shots:9, minutes:180,
    bio:'Meia-atacante de 22 anos, eleito o melhor em campo nas duas rodadas. Dois gols de falta e uma arrancada antológica contra a Costa do Marfim.',
    games:[{opp:'Curaçao', perf:'1 gol, 1 assist'}, {opp:'Costa do Marfim', perf:'2 gols, 87% passes'}]},
-  {id:'haaland', name:'Erling Haaland', team:'Noruega', abbr:'NOR', goals:3, assists:0, shots:7, minutes:90,
-   bio:'Centroavante do Manchester City. Estreou com hat-trick contra o Iraque e já é o favorito à Chuteira de Ouro.',
-   games:[{opp:'Iraque', perf:'3 gols, 4 chutes no alvo'}]},
-  {id:'mbappe', name:'Kylian Mbappé', team:'França', abbr:'FRA', goals:3, assists:1, shots:8, minutes:90,
-   bio:'Capitão da França, voltou a assinar uma atuação dominante na estreia contra o Senegal.',
-   games:[{opp:'Senegal', perf:'2 gols, 1 assist'}]},
+  {id:'messi', name:'Lionel Messi', team:'Argentina', abbr:'ARG', goals:3, assists:2, shots:8, minutes:180,
+   bio:'Capitão e camisa 10 da Argentina. Tornou-se o maior artilheiro da história das Copas do Mundo (18 gols na carreira) ao marcar duas vezes contra a Áustria, ultrapassando Miroslav Klose. Garantiu a classificação antecipada dos argentinos.',
+   games:[{opp:'Argélia', perf:'1 gol, 2 assist'}, {opp:'Áustria', perf:'2 gols'}]},
   {id:'davies', name:'Alphonso Davies', team:'Canadá', abbr:'CAN', goals:2, assists:3, shots:5, minutes:180,
    bio:'Ponta-esquerda do Real Madrid. Duas assistências contra o Catar e um golaço contra a Suíça.',
    games:[{opp:'Catar', perf:'1 gol, 2 assist'}, {opp:'Suíça', perf:'1 gol, 1 assist'}]},
@@ -905,11 +908,11 @@ const scorers = [
    bio:'Camisa 11 da Inglaterra. Dobrou o placar contra a Croácia na estreia.',
    games:[{opp:'Croácia', perf:'2 gols, 84% passes'}]},
   {id:'julián', name:'Julián Álvarez', team:'Argentina', abbr:'ARG', goals:2, assists:0, shots:4, minutes:90,
-   bio:'Atacante do Atlético de Madrid, abriu o placar contra a Jordânia com dois gols.',
-   games:[{opp:'Jordânia', perf:'2 gols'}]},
-  {id:'messi', name:'Lionel Messi', team:'Argentina', abbr:'ARG', goals:1, assists:2, shots:5, minutes:90,
-   bio:'Capitão e camisa 10 da Argentina. Fez o terceiro gol contra a Jordânia e deu duas assistências. Aos 38 anos, segue mágico.',
-   games:[{opp:'Jordânia', perf:'1 gol, 2 assist'}]},
+   bio:'Atacante do Atlético de Madrid, abriu o placar e fez mais um na vitória de estreia sobre a Argélia.',
+   games:[{opp:'Argélia', perf:'2 gols'}]},
+  {id:'ronaldo7', name:'Cristiano Ronaldo', team:'Portugal', abbr:'POR', goals:1, assists:1, shots:7, minutes:180,
+   bio:'Capitão português, ainda em busca de gols nesta edição, mas decisivo na vitória sobre o Uzbequistão.',
+   games:[{opp:'Congo (RD)', perf:'sem gol'}, {opp:'Uzbequistão', perf:'1 gol, 1 assist'}]},
 ];
 
 // CRAQUES POR POSIÇÃO
@@ -923,9 +926,9 @@ const positions = [
 const stars = {
   GOL: [
     {id:'martinez', name:'Emiliano Martínez', team:'Argentina', abbr:'ARG', rating:9.4,
-     stats:{defesas:4, 'jogos sem sofrer':1, 'passes longos':12},
-     quote:'Paredão argentino. Nenhuma bola passou dele na estreia.',
-     bio:'Campeão do mundo em 2022, segue impecável entre as três travas. Salvou um pênalti no aquecimento — dizem os companheiros.'},
+     stats:{defesas:5, 'jogos sem sofrer':2, 'passes longos':14},
+     quote:'Paredão argentino. Nenhuma bola passou dele nas duas rodadas.',
+     bio:'Campeão do mundo em 2022, segue impecável entre as três travas. A Argentina ainda não sofreu gols na competição.'},
     {id:'sommer', name:'Yann Sommer', team:'Suíça', abbr:'SUI', rating:9.1,
      stats:{defesas:6, 'jogos sem sofrer':0, 'passes longos':8},
      quote:'Experiente e seguro, comandou a defesa suíça em dois jogos.',
@@ -944,10 +947,10 @@ const stars = {
      bio:'Bayern de Munique. Capitão e líder técnico. Voltou para substituir o lesionado ter Stegen.'},
   ],
   DEF: [
-    {id:'saliba', name:'William Saliba', team:'França', abbr:'FRA', rating:9.5,
-     stats:{desarmes:7, 'cortes':9, 'passes':142},
+    {id:'saliba', name:'William Saliba', team:'França', abbr:'FRA', rating:9.6,
+     stats:{desarmes:9, 'cortes':12, 'passes':198},
      quote:'Muralha francesa. Senegal e Iraque não passaram.',
-     bio:'Arsenal. Melhor em campo na estreia. 93% de passes certos.'},
+     bio:'Arsenal. Melhor em campo nas duas rodadas. A França só sofreu 1 gol em dois jogos e garantiu vaga antecipada.'},
     {id:'araujo', name:'Ronald Araújo', team:'Uruguai', abbr:'URU', rating:9.2,
      stats:{desarmes:8, 'cortes':11, 'passes':98},
      quote:'Imparável no jogo aéreo. Dominou Cabo Verde.',
@@ -957,9 +960,9 @@ const stars = {
      quote:'Lateral ofensivo que também defende como poucos.',
      bio:'PSG. Equilibra as subidas pelo corredor direito marroquino.'},
     {id:'dias', name:'Rúben Dias', team:'Portugal', abbr:'POR', rating:8.9,
-     stats:{desarmes:6, 'cortes':8, 'passes':104},
+     stats:{desarmes:9, 'cortes':12, 'passes':156},
      quote:'Liderança silenciosa no miolo português.',
-     bio:'Manchester City. Capitão de fato da defesa lusa. Ainda não foi batido.'},
+     bio:'Manchester City. Capitão de fato da defesa lusa, segue invicto em dois jogos.'},
     {id:'cubarsi', name:'Pau Cubarsí', team:'Espanha', abbr:'ESP', rating:8.8,
      stats:{desarmes:5, 'cortes':7, 'passes':156},
      quote:'Zagueiro mais valioso do mundo na posição.',
@@ -988,26 +991,26 @@ const stars = {
      bio:'Napoli. Melhor passador da fase de grupos (92% de acerto). Provável última Copa.'},
   ],
   ATA: [
-    {id:'haaland2', name:'Erling Haaland', team:'Noruega', abbr:'NOR', rating:9.8,
-     stats:{gols:3, assists:0, 'chutes no alvo':6},
-     quote:'Hat-trick na estreia. Máquina de gols.',
-     bio:'Manchester City. Três gols em um jogo, todos de áreas diferentes. Favoritíssimo à Chuteira de Ouro.'},
-    {id:'mbappe2', name:'Kylian Mbappé', team:'França', abbr:'FRA', rating:9.6,
-     stats:{gols:3, assists:1, 'chutes no alvo':7},
-     quote:'Velocidade e finalização cirúrgica.',
-     bio:'Real Madrid. Capitão francês, já balançou as redes em dois jogos seguidos.'},
+    {id:'haaland2', name:'Erling Haaland', team:'Noruega', abbr:'NOR', rating:9.9,
+     stats:{gols:5, assists:0, 'chutes no alvo':9},
+     quote:'Hat-trick na estreia e dobradinha na 2ª rodada. Máquina de gols.',
+     bio:'Manchester City. Cinco gols em dois jogos. Favoritíssimo à Chuteira de Ouro e à classificação antecipada da Noruega.'},
+    {id:'mbappe2', name:'Kylian Mbappé', team:'França', abbr:'FRA', rating:9.7,
+     stats:{gols:4, assists:1, 'chutes no alvo':10},
+     quote:'Velocidade e finalização cirúrgica em dois jogos seguidos.',
+     bio:'Real Madrid. Capitão francês, já balançou as redes quatro vezes e garantiu vaga antecipada nas oitavas.'},
     {id:'vinicius2', name:'Vinícius Júnior', team:'Brasil', abbr:'BRA', rating:9.3,
      stats:{gols:2, assists:1, 'dribles':14},
      quote:'Drible curto e explosão. Impossível de marcar no 1x1.',
      bio:'Real Madrid. 14 dribles certos em dois jogos — recorde da Copa.'},
+    {id:'messi2', name:'Lionel Messi', team:'Argentina', abbr:'ARG', rating:9.5,
+     stats:{gols:3, assists:2, 'passes decisivos':8},
+     quote:'Aos 38 anos, tornou-se o maior artilheiro da história das Copas.',
+     bio:'Inter Miami. Capitão e alma da Argentina, agora líder histórico de gols em Mundiais (18), superando Klose. Sexta Copa da carreira, classificação antecipada garantida.'},
     {id:'yamal2', name:'Lamine Yamal', team:'Espanha', abbr:'ESP', rating:9.2,
      stats:{gols:2, assists:2, 'dribles':11},
      quote:'Menino de 18 anos jogando como veterano.',
      bio:'Barcelona. Participou de 4 dos 4 gols espanhóis. Sensação do torneio.'},
-    {id:'messi2', name:'Lionel Messi', team:'Argentina', abbr:'ARG', rating:9.1,
-     stats:{gols:1, assists:2, 'passes decisivos':6},
-     quote:'Aos 38 anos, a magia segue intacta.',
-     bio:'Inter Miami. Um gol e duas assistências na estreia. Capitão e alma da Argentina. Sexta Copa da carreira.'},
     {id:'palmer2', name:'Cole Palmer', team:'Inglaterra', abbr:'ENG', rating:8.9,
      stats:{gols:2, assists:1, 'chutes no alvo':5},
      quote:'Frieza inglesa na hora da finalização.',
@@ -1376,4 +1379,4 @@ renderScorers();
 renderPositions();
 </script>
 </body>
-  </html>
+</html>
