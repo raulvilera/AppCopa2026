@@ -2402,4 +2402,74 @@ function openModal(id, type) {
   modal.innerHTML = `
     <div class="pm-header">
       <button class="pm-close" onclick="closeModal()">✕</button>
-      <div class="pm-avatar">${i
+      <div class="pm-avatar">${init}</div>
+      <div class="pm-name">${data.name}</div>
+      <div class="pm-sub">
+        <span class="badge">${data.abbr}</span>
+        <span>${data.team}</span>
+        ${data.rating ? `<span>· Nota ${data.rating.toFixed(1)}</span>` : ''}
+      </div>
+    </div>
+    <div class="pm-body">
+      ${statsHtml}
+      ${gamesHtml}
+      <div class="pm-section">
+        <h4>Perfil</h4>
+        <p class="pm-bio">${data.bio}</p>
+      </div>
+    </div>
+  `;
+
+  requestAnimationFrame(() => {
+    modal.classList.add('show');
+    overlay.classList.add('show');
+    modalOpen = true;
+  });
+  document.addEventListener('keydown', onModalEsc);
+}
+
+function closeModal() {
+  const modal   = document.getElementById('player-modal');
+  const overlay = document.getElementById('overlay');
+  modal.classList.remove('show');
+  if (!expandedGroup) overlay.classList.remove('show');
+  document.removeEventListener('keydown', onModalEsc);
+  modalOpen = false;
+}
+
+function onModalEsc(e) { if (e.key === 'Escape') closeModal(); }
+
+document.getElementById('overlay').addEventListener('click', () => {
+  closeGroup();
+  closeModal();
+  closeMatchDetail();
+});
+
+// ════════════════════════════════════════
+// REFRESH
+// ════════════════════════════════════════
+function handleRefresh() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 500);
+  showToast('Para dados novos, peça no chat: "atualiza a Copa"');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => toast.classList.remove('show'), 3400);
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderGames();
+renderGroups();
+renderScorers();
+renderPositions();
+</script>
+</body>
+</html>
