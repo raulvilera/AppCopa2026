@@ -598,6 +598,7 @@ body {
   box-shadow: 0 24px 64px rgba(0,0,0,0.65), 0 10px 18px -6px rgba(0,0,0,0.55);
   overflow: auto;
   cursor: default;
+  transform: translate(-50%, -50%); /* Correção: Centraliza corretamente */
 }
 .group-card.expanded .group-head { position: sticky; top: 0; background: #162A1E; }
 
@@ -1138,12 +1139,7 @@ tbody tr.pos-2nd.row-odd { background: rgba(212,168,67,0.22); }
 }
 .mm-stat-num.h { color: #5DADE2; text-align: right; }
 .mm-stat-num.a { color: var(--gold); text-align: left; }
-.mm-stat-track {
-  flex: 1;
-  display: flex;
-  gap: 2px;
-  height: 7px;
-}
+.mm-stat-track { flex: 1; display: flex; gap: 2px; height: 7px; }
 .mm-stat-track-half { flex: 1; display: flex; }
 .mm-stat-track-half.h { justify-content: flex-end; }
 .mm-stat-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
@@ -2184,37 +2180,33 @@ function renderGroups() {
   }).join('');
 }
 
+// Função corrigida para expansão do grupo
 function toggleGroup(card) {
   if (expandedGroup) return;
   const grid = document.getElementById('groups-grid');
   const overlay = document.getElementById('overlay');
   const fr = card.getBoundingClientRect();
-  const cx = fr.left + fr.width / 2;
-  const cy = fr.top + fr.height / 2;
 
+  // Cria placeholder para manter o layout
   const ph = document.createElement('div');
   ph.className = 'group-card-placeholder';
   ph.style.cssText = `width:${fr.width}px;height:${fr.height}px;`;
   card.parentNode.insertBefore(ph, card);
 
+  // Adiciona classes
   grid.classList.add('has-expanded');
   card.classList.add('expanded');
 
-  const nx = window.innerWidth / 2;
-  const ny = window.innerHeight / 2;
-  const lr = card.getBoundingClientRect();
-  const sx = fr.width / lr.width;
-  const sy = fr.height / lr.height;
-  const dx = cx - nx;
-  const dy = cy - ny;
-
+  // Animação simples: começa invisível e pequeno, vai para o centro
   card.style.transition = 'none';
-  card.style.transform  = `translate(-50%,-50%) translate(${dx}px,${dy}px) scale(${sx},${sy})`;
-  card.getBoundingClientRect();
+  card.style.opacity = '0';
+  card.style.transform = 'translate(-50%, -50%) scale(0.85)';
+  card.getBoundingClientRect(); // força reflow
 
   requestAnimationFrame(() => {
-    card.style.transition = 'transform 0.38s cubic-bezier(0.22,0.9,0.25,1), box-shadow 0.3s ease';
-    card.style.transform  = 'translate(-50%,-50%)';
+    card.style.transition = 'opacity 0.28s ease, transform 0.32s cubic-bezier(0.22,0.9,0.25,1)';
+    card.style.opacity = '1';
+    card.style.transform = 'translate(-50%, -50%) scale(1)';
   });
 
   overlay.classList.add('show');
@@ -2228,23 +2220,19 @@ function closeGroup() {
   const grid = document.getElementById('groups-grid');
   const overlay = document.getElementById('overlay');
 
-  const cur = card.getBoundingClientRect();
-  const tgt = ph.getBoundingClientRect();
-  const sx = tgt.width / cur.width;
-  const sy = tgt.height / cur.height;
-  const dx = (tgt.left + tgt.width/2) - (window.innerWidth/2);
-  const dy = (tgt.top + tgt.height/2) - (window.innerHeight/2);
-
-  card.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
-  card.style.transform  = `translate(-50%,-50%) translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+  // Animação de fechamento: encolhe e desaparece
+  card.style.transition = 'opacity 0.22s ease, transform 0.26s ease';
+  card.style.opacity = '0';
+  card.style.transform = 'translate(-50%, -50%) scale(0.9)';
 
   if (!modalOpen) overlay.classList.remove('show');
 
   card.addEventListener('transitionend', function onEnd(e) {
-    if (e.target !== card) return;
+    if (e.propertyName !== 'opacity' && e.propertyName !== 'transform') return;
     card.classList.remove('expanded');
     card.style.transition = '';
-    card.style.transform  = '';
+    card.style.opacity = '';
+    card.style.transform = '';
     grid.classList.remove('has-expanded');
     ph.parentNode.insertBefore(card, ph);
     ph.remove();
@@ -2472,4 +2460,4 @@ renderScorers();
 renderPositions();
 </script>
 </body>
-</html>
+                             </html>
