@@ -297,6 +297,20 @@ body {
 .game-card.status-scheduled::before { background: linear-gradient(90deg, var(--blue), transparent); }
 .game-card.status-live::before { background: linear-gradient(90deg, var(--red), transparent); animation: pulse-line 1s ease-in-out infinite alternate; }
 @keyframes pulse-line { to { opacity: 0.4; } }
+.game-card-clickable { cursor: pointer; }
+.game-card-clickable:active { transform: scale(0.985); }
+.gc-detail-hint {
+  margin-top: 10px;
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: right;
+  opacity: 0.75;
+}
+.game-card-clickable:hover .gc-detail-hint { opacity: 1; }
 
 .gc-top {
   display: flex;
@@ -523,13 +537,14 @@ body {
 }
 .group-card {
   background: var(--bg-2);
-  border: 1px solid var(--line);
+  border: 2px solid #FFFFFF;
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s ease, opacity 0.3s ease, filter 0.3s ease;
+  box-shadow: 0 10px 18px -6px rgba(0,0,0,0.55);
 }
-.group-card:hover { border-color: var(--chalk-faint); }
+.group-card:hover { border-color: #FFFFFF; box-shadow: 0 14px 24px -6px rgba(0,0,0,0.65); }
 .group-card:not(.expanded):active { transform: scale(0.988); }
 .groups-grid.has-expanded .group-card:not(.expanded) {
   opacity: 0.22;
@@ -580,7 +595,7 @@ body {
   width: min(94vw, 480px);
   max-height: 84vh;
   z-index: 1000;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.65);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.65), 0 10px 18px -6px rgba(0,0,0,0.55);
   overflow: auto;
   cursor: default;
 }
@@ -608,10 +623,14 @@ td.t-sg { font-weight: 600; text-align: center; }
 td.t-sg.pos { color: var(--green); }
 td.t-sg.neg { color: var(--red); }
 td.t-dim { color: var(--chalk-dim); text-align: center; }
-tbody tr.qualify { background: rgba(212,168,67,0.08); }
-tbody tr.qualify td.t-pos { color: var(--gold); }
+tbody tr.pos-1st { background: rgba(41,128,185,0.18); }
+tbody tr.pos-1st td.t-pos { color: #5DADE2; }
+tbody tr.pos-1st td.t-team { color: #BFE0F5; }
+tbody tr.pos-2nd { background: rgba(212,168,67,0.16); }
+tbody tr.pos-2nd td.t-pos { color: var(--gold); }
 tbody tr.row-odd { background: rgba(255,255,255,0.02); }
-tbody tr.qualify.row-odd { background: rgba(212,168,67,0.12); }
+tbody tr.pos-1st.row-odd { background: rgba(41,128,185,0.24); }
+tbody tr.pos-2nd.row-odd { background: rgba(212,168,67,0.22); }
 
 .legend {
   display: flex;
@@ -935,6 +954,326 @@ tbody tr.qualify.row-odd { background: rgba(212,168,67,0.12); }
 .pm-game .opp { color: var(--chalk); font-weight: 500; }
 .pm-game .perf { font-family: var(--font-head); font-weight: 700; color: var(--gold); }
 
+/* ── MATCH DETAIL MODAL ── */
+.match-modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: min(94vw, 560px);
+  max-height: 90vh;
+  background: var(--bg-2);
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  z-index: 1100;
+  box-shadow: 0 28px 72px rgba(0,0,0,0.7);
+  overflow: auto;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -48%) scale(0.94);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.match-modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+
+.mm-header {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #182c1f, #131f17);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 20px 16px;
+  z-index: 2;
+}
+.mm-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--chalk-faint);
+  color: var(--chalk);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+.mm-close:hover { background: rgba(239,242,236,0.25); }
+.mm-meta {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--chalk-dim);
+  margin-bottom: 14px;
+}
+.mm-scoreline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.mm-team { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.mm-team-flag { font-size: 30px; line-height: 1; }
+.mm-team-name {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.mm-score {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 40px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.mm-venue-line {
+  text-align: center;
+  font-size: 11px;
+  color: var(--chalk-dim);
+  margin-top: 10px;
+}
+
+.mm-body { padding: 20px 20px 28px; }
+.mm-section { margin-bottom: 22px; }
+.mm-section:last-child { margin-bottom: 0; }
+.mm-section h4 {
+  font-family: var(--font-head);
+  font-weight: 700; font-size: 11px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mm-section h4::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* MOTM */
+.mm-motm {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(212,168,67,0.16), rgba(212,168,67,0.03));
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+}
+.mm-motm-icon {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.mm-motm-info { flex: 1; min-width: 0; }
+.mm-motm-name {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.mm-motm-role { font-size: 11px; color: var(--chalk-dim); margin-top: 2px; }
+.mm-motm-rating {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* Posse de bola */
+.mm-possession-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mm-possession-val {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 18px;
+  width: 48px;
+  flex-shrink: 0;
+}
+.mm-possession-val.h { color: #5DADE2; text-align: left; }
+.mm-possession-val.a { color: var(--gold); text-align: right; }
+.mm-possession-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  background: var(--bg-3);
+}
+.mm-possession-bar .h-fill { background: #5DADE2; height: 100%; transition: width 0.6s ease; }
+.mm-possession-bar .a-fill { background: var(--gold); height: 100%; transition: width 0.6s ease; }
+.mm-possession-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-head);
+}
+
+/* Stat comparativo (chutes, etc) */
+.mm-stat-row { margin-bottom: 14px; }
+.mm-stat-row:last-child { margin-bottom: 0; }
+.mm-stat-label {
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  font-family: var(--font-head);
+  font-weight: 600;
+}
+.mm-stat-bars { display: flex; align-items: center; gap: 10px; }
+.mm-stat-num {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 15px;
+  width: 30px;
+  flex-shrink: 0;
+}
+.mm-stat-num.h { color: #5DADE2; text-align: right; }
+.mm-stat-num.a { color: var(--gold); text-align: left; }
+.mm-stat-track {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  height: 7px;
+}
+.mm-stat-track-half { flex: 1; display: flex; }
+.mm-stat-track-half.h { justify-content: flex-end; }
+.mm-stat-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.mm-stat-fill.h { background: #5DADE2; }
+.mm-stat-fill.a { background: var(--gold); }
+.mm-stat-track-bg { flex: 1; background: var(--bg-3); border-radius: 4px; }
+
+/* Chutes certos/errados (gols) */
+.mm-shots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mm-shots-team {
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.mm-shots-team-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mm-shots-team.home .mm-shots-team-name { color: #5DADE2; }
+.mm-shots-team.away .mm-shots-team-name { color: var(--gold); }
+.mm-shots-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 0;
+  border-top: 1px solid var(--line-2);
+}
+.mm-shots-line:first-of-type { border-top: none; }
+.mm-shots-line .lbl { color: var(--chalk-dim); }
+.mm-shots-line .val { font-family: var(--font-head); font-weight: 700; }
+.mm-shots-line .val.ok { color: var(--green); }
+.mm-shots-line .val.bad { color: var(--red); }
+
+/* Mapa de calor */
+.mm-heatmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mm-heatmap-team-label {
+  text-align: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.mm-heatmap-team-label.h { color: #5DADE2; }
+.mm-heatmap-team-label.a { color: var(--gold); }
+.mm-heatmap-pitch {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: #0e1d13;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mm-heatmap-pitch::before {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border: 1px solid rgba(239,242,236,0.12);
+  border-radius: 2px;
+}
+.mm-heatmap-pitch::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 26%; height: 26%;
+  border: 1px solid rgba(239,242,236,0.12);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+}
+.mm-heat-cell {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(7px);
+  mix-blend-mode: screen;
+}
+
+/* Escalação por posição */
+.mm-lineup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mm-lineup-team-label {
+  text-align: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.mm-lineup-team-label.h { color: #5DADE2; }
+.mm-lineup-team-label.a { color: var(--gold); }
+.mm-lineup-pos-block { margin-bottom: 10px; }
+.mm-lineup-pos-block:last-child { margin-bottom: 0; }
+.mm-lineup-pos-title {
+  font-size: 9.5px;
+  color: var(--chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-head);
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.mm-lineup-pos-count {
+  background: var(--bg-3);
+  border-radius: 8px;
+  padding: 0 6px;
+  color: var(--chalk-dim);
+}
+.mm-lineup-players {
+  font-size: 12px;
+  color: rgba(239,242,236,0.85);
+  line-height: 1.5;
+}
+.mm-lineup-players span { display: block; }
+
+@media (max-width: 480px) {
+  .mm-shots-grid, .mm-heatmap-grid, .mm-lineup-grid { grid-template-columns: 1fr; }
+  .mm-score { font-size: 30px; }
+  .mm-team-flag { font-size: 24px; }
+}
+
 /* ── OVERLAY ── */
 .overlay {
   position: fixed; inset: 0;
@@ -1046,7 +1385,8 @@ footer {
     <p class="section-label">12 grupos — Fase de grupos</p>
     <div class="groups-grid" id="groups-grid"></div>
     <div class="legend">
-      <div class="legend-item"><span class="legend-dot" style="background:rgba(212,168,67,0.5)"></span>Classificado (1º e 2º)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2980B9"></span>1º colocado</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span>2º colocado</div>
       <div class="legend-item"><span style="color:var(--green)">▲</span> SG positivo · <span style="color:var(--red)">▼</span> SG negativo</div>
       <div class="legend-item">Critério: Pts → SG → Gols marcados</div>
     </div>
@@ -1079,6 +1419,7 @@ footer {
 
 <div class="overlay" id="overlay"></div>
 <div class="player-modal" id="player-modal" role="dialog" aria-modal="true"></div>
+<div class="match-modal" id="match-modal" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
 
 <script>
@@ -1259,6 +1600,62 @@ const TEAM_NAMES = {
 };
 
 // ════════════════════════════════════════
+// ESCALAÇÕES SIMPLIFICADAS (titulares por posição, esquema 1-4-3-3)
+// Usadas no detalhe de partida. Goleiros reais conhecidos por seleção;
+// demais nomes são titulares plausíveis para preencher o XI.
+// ════════════════════════════════════════
+const SQUADS = {
+  MEX:{GOL:['Hugo González'],DEF:['César Montes','Johan Vásquez','Gerardo Arteaga','Jesús Gallardo'],MEI:['Edson Álvarez','Luis Chávez','Orbelín Pineda'],ATA:['Santiago Giménez','Hirving Lozano','Uriel Antuna']},
+  RSA:{GOL:['Ronwen Williams'],DEF:['Innocent Maela','Siyabonga Ngezana','Mothobi Mvala','Sipho Mbule'],MEI:['Teboho Mokoena','Sphephelo Sithole','Themba Zwane'],ATA:['Lyle Foster','Percy Tau','Evidence Makgopa']},
+  CZE:{GOL:['Jindřich Staněk'],DEF:['Vladimír Coufal','Robin Hranáč','Ladislav Krejčí','David Jurásek'],MEI:['Tomáš Souček','Lukáš Provod','Antonín Barák'],ATA:['Patrik Schick','Adam Hložek','Václav Černý']},
+  KOR:{GOL:['Jo Hyeon-woo'],DEF:['Kim Min-jae','Kim Young-gwon','Kim Tae-hwan','Seol Young-woo'],MEI:['Hwang In-beom','Park Yong-woo','Lee Jae-sung'],ATA:['Son Heung-min','Cho Gue-sung','Hwang Hee-chan']},
+  CAN:{GOL:['Maxime Crépeau'],DEF:['Alistair Johnston','Moïse Bombito','Kamal Miller','Alphonso Davies'],MEI:['Stephen Eustáquio','Ismaël Koné','Jonathan Osorio'],ATA:['Jonathan David','Tajon Buchanan','Cyle Larin']},
+  SUI:{GOL:['Yann Sommer'],DEF:['Ricardo Rodríguez','Manuel Akanji','Nico Elvedi','Silvan Widmer'],MEI:['Remo Freuler','Granit Xhaka','Xherdan Shaqiri'],ATA:['Breel Embolo','Ruben Vargas','Dan Ndoye']},
+  BIH:{GOL:['Nikola Vasilj'],DEF:['Ervin Zukanović','Toni Šunjić','Adnan Mahmutović','Riad Bajić'],MEI:['Gradimir Crnogorac','Rade Krunić','Amar Rahmanović'],ATA:['Edin Džeko','Haris Tabaković','Smail Prevljak']},
+  QAT:{GOL:['Saad Al Sheeb'],DEF:['Pedro Miguel','Bassam Al Rawi','Tarek Salman','Homam Ahmed'],MEI:['Karim Boudiaf','Abdulaziz Hatem','Mohammed Waad'],ATA:['Almoez Ali','Akram Afif','Ahmed Alaaeldin']},
+  BRA:{GOL:['Ederson'],DEF:['Danilo','Marquinhos','Gabriel Magalhães','Wendell'],MEI:['Bruno Guimarães','Lucas Paquetá','João Gomes'],ATA:['Vinícius Júnior','Rodrygo','Endrick']},
+  HTI:{GOL:['Johnny Placide'],DEF:['Carlens Arcus','Ricardo Ade','Jems Geffrard','Kenny Saint Pres'],MEI:['Roman Léonard','Sébastien Thuriere','Ricardo Faus'],ATA:['Duckens Nazon','Frantzdy Pierrot','Steeven Saba']},
+  SCO:{GOL:['Angus Gunn'],DEF:['Anthony Ralston','Jack Hendry','Grant Hanley','Greg Taylor'],MEI:['Callum McGregor','Billy Gilmour','John McGinn'],ATA:['Che Adams','Lawrence Shankland','Ryan Christie']},
+  MAR:{GOL:['Yassine Bounou'],DEF:['Achraf Hakimi','Romain Saïss','Nayef Aguerd','Noussair Mazraoui'],MEI:['Sofyan Amrabat','Azzedine Ounahi','Selim Amallah'],ATA:['Hakim Ziyech','Youssef En-Nesyri','Brahim Díaz']},
+  USA:{GOL:['Matt Turner'],DEF:['Sergiño Dest','Tim Ream','Chris Richards','Antonee Robinson'],MEI:['Tyler Adams','Weston McKennie','Yunus Musah'],ATA:['Christian Pulisic','Folarin Balogun','Timothy Weah']},
+  TUR:{GOL:['Uğurcan Çakır'],DEF:['Zeki Çelik','Merih Demiral','Çağlar Söyüncü','Ferdi Kadıoğlu'],MEI:['Hakan Çalhanoğlu','İsmail Yüksek','Arda Güler'],ATA:['Kerem Aktürkoğlu','Cengiz Ünder','Barış Alper Yılmaz']},
+  AUS:{GOL:['Mathew Ryan'],DEF:['Nathaniel Atkinson','Harry Souttar','Kye Rowles','Aziz Behich'],MEI:['Aaron Mooy','Jackson Irvine','Riley McGree'],ATA:['Mitchell Duke','Craig Goodwin','Mathew Leckie']},
+  PAR:{GOL:['Roberto Fernández'],DEF:['Gustavo Gómez','Omar Alderete','Fabián Balbuena','Robert Rojas'],MEI:['Mathías Villasanti','Damián Bobadilla','Ángel Cardozo'],ATA:['Ramón Sosa','Julio Enciso','Antonio Sanabria']},
+  GER:{GOL:['Manuel Neuer'],DEF:['Joshua Kimmich','Antonio Rüdiger','Jonathan Tah','David Raum'],MEI:['Robert Andrich','Jamal Musiala','Florian Wirtz'],ATA:['Kai Havertz','Leroy Sané','Niclas Füllkrug']},
+  CIV:{GOL:['Yahia Fofana'],DEF:['Wilfried Singo','Odilon Kossounou','Évan Ndicka','Ghislain Konan'],MEI:['Franck Kessié','Seko Fofana','Jean-Michaël Seri'],ATA:['Sébastien Haller','Christian Kouamé','Simon Adingra']},
+  ECU:{GOL:['Hernán Galíndez'],DEF:['Ángelo Preciado','Piero Hincapié','Félix Torres','Pervis Estupiñán'],MEI:['Moisés Caicedo','Jhon Yeboah','Alan Franco'],ATA:['Enner Valencia','Kevin Rodríguez','Gonzalo Plata']},
+  CUW:{GOL:['Eloy Room'],DEF:['Cuco Martina','Juriën Gaari','Charlison Benschop','Ricardo Koeswijk'],MEI:['Leandro Bacuna','Gino van Kessel','Rangelo Janga'],ATA:['Wesley Reekers','Elson Hooi','Sherjill MacDonald']},
+  NED:{GOL:['Bart Verbruggen'],DEF:['Denzel Dumfries','Virgil van Dijk','Stefan de Vrij','Nathan Aké'],MEI:['Tijjani Reijnders','Frenkie de Jong','Xavi Simons'],ATA:['Cody Gakpo','Memphis Depay','Steven Bergwijn']},
+  SWE:{GOL:['Robin Olsen'],DEF:['Emil Krafth','Victor Lindelöf','Isak Hien','Erik Gustafsson'],MEI:['Albin Ekdal','Sebastian Larsson','Anthony Elanga'],ATA:['Alexander Isak','Viktor Gyökeres','Dejan Kulusevski']},
+  JPN:{GOL:['Zion Suzuki'],DEF:['Hiroki Ito','Ko Itakura','Takehiro Tomiyasu','Yukinari Sugawara'],MEI:['Wataru Endo','Hidemasa Morita','Takefusa Kubo'],ATA:['Kaoru Mitoma','Ayase Ueda','Junya Ito']},
+  TUN:{GOL:['Aymen Dahmen'],DEF:['Mohamed Dräger','Yassine Meriah','Montassar Talbi','Ali Abdi'],MEI:['Aïssa Laïdouni','Ellyes Skhiri','Hannibal Mejbri'],ATA:['Issam Jebali','Seifeddine Jaziri','Naim Sliti']},
+  BEL:{GOL:['Koen Casteels'],DEF:['Timothy Castagne','Wout Faes','Jan Vertonghen','Arthur Theate'],MEI:['Amadou Onana','Youri Tielemans','Kevin De Bruyne'],ATA:['Romelu Lukaku','Jérémy Doku','Leandro Trossard']},
+  IRN:{GOL:['Alireza Beiranvand'],DEF:['Sadegh Moharrami','Majid Hosseini','Morteza Pouraliganji','Milad Mohammadi'],MEI:['Saeid Ezatolahi','Ahmad Nourollahi','Ali Gholizadeh'],ATA:['Sardar Azmoun','Mehdi Taremi','Karim Ansarifard']},
+  NZL:{GOL:['Oliver Sail'],DEF:['Storm Roux','Tommy Smith','Michael Boxall','Liberato Cacace'],MEI:['Joe Bell','Marko Stamenić','Sarpreet Singh'],ATA:['Chris Wood','Kosta Barbarouses','Elijah Just']},
+  EGY:{GOL:['Mohamed El Shenawy'],DEF:['Ahmed Fatouh','Mohamed Abdelmonem','Mohamed Hany','Akram Tawfik'],MEI:['Mohamed Elneny','Emam Ashour','Mahmoud Trezeguet'],ATA:['Mohamed Salah','Omar Marmoush','Mostafa Mohamed']},
+  ESP:{GOL:['Unai Simón'],DEF:['Dani Carvajal','Aymeric Laporte','Pau Cubarsí','Marc Cucurella'],MEI:['Rodri','Pedri','Fabián Ruiz'],ATA:['Lamine Yamal','Álvaro Morata','Nico Williams']},
+  URU:{GOL:['Sergio Rochet'],DEF:['Matías Viña','José María Giménez','Ronald Araújo','Guillermo Varela'],MEI:['Federico Valverde','Manuel Ugarte','Giorgian de Arrascaeta'],ATA:['Darwin Núñez','Facundo Pellistri','Cristhian Olivera']},
+  CPV:{GOL:['Vozinha'],DEF:['Stopira','Roberto Lopes','Diney','Jeffry Fortes'],MEI:['Patrick Andrade','Kenny Rocha','Dylan Tavares'],ATA:['Garry Rodrigues','Willy Semedo','Bryan Teixeira']},
+  KSA:{GOL:['Mohammed Al-Owais'],DEF:['Saud Abdulhamid','Ali Al-Bulayhi','Hassan Tambakti','Yasser Al-Shahrani'],MEI:['Mohammed Kanno','Abdullah Al-Khaibari','Salem Al-Dawsari'],ATA:['Firas Al-Buraikan','Saleh Al-Shehri','Abdulrahman Ghareeb']},
+  FRA:{GOL:['Mike Maignan'],DEF:['Jules Koundé','William Saliba','Dayot Upamecano','Theo Hernández'],MEI:['Aurélien Tchouaméni','Eduardo Camavinga','Antoine Griezmann'],ATA:['Kylian Mbappé','Ousmane Dembélé','Marcus Thuram']},
+  SEN:{GOL:['Édouard Mendy'],DEF:['Youssouf Sabaly','Kalidou Koulibaly','Abdou Diallo','Ismail Jakobs'],MEI:['Idrissa Gana Gueye','Pape Matar Sarr','Pathé Ciss'],ATA:['Sadio Mané','Nicolas Jackson','Ismaila Sarr']},
+  NOR:{GOL:['Ørjan Nyland'],DEF:['Stian Gregersen','Leo Skiri Østigård','Birger Meling','Julian Ryerson'],MEI:['Sander Berge','Morten Thorsby','Martin Ødegaard'],ATA:['Erling Haaland','Alexander Sørloth','Antonio Nusa']},
+  IRQ:{GOL:['Jalal Hassan'],DEF:['Ahmed Ibrahim','Rebin Sulaka','Mohanad Ali','Hussein Ali'],MEI:['Amir Al Ammari','Zaid Tahseen','Ali Jasim'],ATA:['Aymen Hussein','Mohanad Abdulraheem','Ayman Hussein']},
+  ARG:{GOL:['Emiliano Martínez'],DEF:['Nahuel Molina','Cristian Romero','Lisandro Martínez','Nicolás Tagliafico'],MEI:['Rodrigo De Paul','Enzo Fernández','Alexis Mac Allister'],ATA:['Lionel Messi','Julián Álvarez','Ángel Di María']},
+  DZA:{GOL:['Anthony Mandrea'],DEF:['Ahmed Touba','Aïssa Mandi','Rami Bensebaini','Youcef Atal'],MEI:['Ismaël Bennacer','Houssem Aouar','Nabil Bentaleb'],ATA:['Riyad Mahrez','Baghdad Bounedjah','Amir Sayoud']},
+  AUT:{GOL:['Patrick Pentz'],DEF:['Stefan Posch','Kevin Danso','Philipp Lienhart','Alexander Prass'],MEI:['Konrad Laimer','Florian Grillitsch','Christoph Baumgartner'],ATA:['Marcel Sabitzer','Marko Arnautović','Michael Gregoritsch']},
+  JOR:{GOL:['Yazeed Abulaila'],DEF:['Abdallah Nasib','Yazan Al-Naimat','Ehsan Haddad','Mohammad Abu Hashhash'],MEI:['Musa Al-Taamari','Ali Olwan','Rajaei Ayed'],ATA:['Yazan Al-Arab','Mahmoud Al-Mardi','Anas Bani Yaseen']},
+  POR:{GOL:['Diogo Costa'],DEF:['Diogo Dalot','Rúben Dias','Pepe','Nuno Mendes'],MEI:['Vitinha','Bernardo Silva','Bruno Fernandes'],ATA:['Cristiano Ronaldo','Rafael Leão','João Félix']},
+  COD:{GOL:['Lionel Mpasi'],DEF:['Gradi Mughelo','Chancel Mbemba','Joel Kimwaki','Issama Mpeko'],MEI:['Samuel Moutoussamy','Charles Pickel','Silas Katompa'],ATA:['Cédric Bakambu','Fiston Mayele','Yoane Wissa']},
+  COL:{GOL:['Camilo Vargas'],DEF:['Daniel Muñoz','Davinson Sánchez','William Tesillo','Johan Mojica'],MEI:['Jefferson Lerma','James Rodríguez','Jhon Arias'],ATA:['Luis Díaz','Rafael Santos Borré','Jhon Córdoba']},
+  UZB:{GOL:['Utkir Yusupov'],DEF:['Abbosbek Fayzullaev','Sherzod Nasridinov','Davronjon Ashurmatov','Ahmadkhodja Alibekov'],MEI:['Eldor Shomurodov','Jasurbek Yakhshiboev','Khojiakbar Alijonov'],ATA:['Eldor Shomurodov','Azizbek Turgunboev','Marufjon Shaimov']},
+  ENG:{GOL:['Jordan Pickford'],DEF:['Kyle Walker','John Stones','Marc Guéhi','Levi Colwill'],MEI:['Declan Rice','Jude Bellingham','Cole Palmer'],ATA:['Harry Kane','Phil Foden','Bukayo Saka']},
+  GHA:{GOL:['Lawrence Ati-Zigi'],DEF:['Tariq Lamptey','Alexander Djiku','Mohammed Salisu','Gideon Mensah'],MEI:['Thomas Partey','Mohammed Kudus','Iddrisu Baba'],ATA:['Jordan Ayew','Inaki Williams','Antoine Semenyo']},
+  PAN:{GOL:['Orlando Mosquera'],DEF:['Michael Murillo','Fidel Escobar','Eric Davis','Andrés Andrade'],MEI:['Aníbal Godoy','Adalberto Carrasquilla','Édgar Bárcenas'],ATA:['Ismael Díaz','César Blackman','José Fajardo']},
+  CRO:{GOL:['Dominik Livaković'],DEF:['Josip Stanišić','Josko Gvardiol','Joško Sutalo','Borna Sosa'],MEI:['Luka Modrić','Mateo Kovačić','Mario Pašalić'],ATA:['Luka Ivanušec','Andrej Kramarić','Bruno Petković']},
+};
+
+// ════════════════════════════════════════
 // TABS
 // ════════════════════════════════════════
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1370,8 +1767,11 @@ function renderGameCard(g) {
     `;
   }
 
+  const clickAttr = isFinal ? ` onclick="openMatchDetail(${GAMES.indexOf(g)})"` : '';
+  const clickableClass = isFinal ? ' game-card-clickable' : '';
+
   return `
-    <div class="game-card status-${g.status}">
+    <div class="game-card status-${g.status}${clickableClass}"${clickAttr}>
       <div class="gc-top">
         <span class="gc-group">Grupo ${g.group}</span>
         ${badgeHtml}
@@ -1394,6 +1794,7 @@ function renderGameCard(g) {
         <span class="gc-venue-pin">📍</span>
         <span class="gc-venue-text"><span class="gc-venue-city">${g.venue}</span> · ${g.city}</span>
       </div>
+      ${isFinal ? `<div class="gc-detail-hint">Toque para ver estatísticas ›</div>` : ''}
     </div>
   `;
 }
@@ -1439,6 +1840,302 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ════════════════════════════════════════
+// ESTATÍSTICAS DE PARTIDA — geradas de forma determinística
+// a partir do placar real de cada jogo (mesmo índice = mesmos números
+// sempre). Não são dados oficiais do Sportradar; servem para ilustrar
+// posse de bola, mapa de calor, escalação e desempenho dentro do app.
+// ════════════════════════════════════════
+function seededRandom(seed) {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return function () {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function buildMatchStats(game, gameIndex) {
+  const rnd = seededRandom(gameIndex * 97 + 13);
+  const hs = game.hs ?? 0, as = game.as ?? 0;
+  const goalDiff = hs - as;
+
+  // Posse de bola: time com mais gols tende a ter mais posse, com variação
+  let basePoss = 50 + goalDiff * 3.2 + (rnd() * 10 - 5);
+  basePoss = Math.max(34, Math.min(66, basePoss));
+  const possH = Math.round(basePoss);
+  const possA = 100 - possH;
+
+  // Chutes totais e no alvo — escalados com o placar e posse
+  const shotsH = Math.max(hs + 4, Math.round(8 + possH / 8 + rnd() * 6));
+  const shotsA = Math.max(as + 4, Math.round(8 + possA / 8 + rnd() * 6));
+  const onTargetH = Math.max(hs, Math.round(shotsH * (0.32 + rnd() * 0.18)));
+  const onTargetA = Math.max(as, Math.round(shotsA * (0.32 + rnd() * 0.18)));
+  const offTargetH = Math.max(0, shotsH - onTargetH);
+  const offTargetA = Math.max(0, shotsA - onTargetA);
+
+  const cornersH = Math.round(3 + rnd() * 6);
+  const cornersA = Math.round(3 + rnd() * 6);
+  const foulsH = Math.round(7 + rnd() * 8);
+  const foulsA = Math.round(7 + rnd() * 8);
+  const passAccH = Math.round(72 + possH / 6 + rnd() * 6);
+  const passAccA = Math.round(72 + possA / 6 + rnd() * 6);
+
+  // Escalação 1-4-3-3: 1 GOL, 4 DEF, 3 MEI, 3 ATA
+  const homeSquad = SQUADS[game.home];
+  const awaySquad = SQUADS[game.away];
+  const lineup = {
+    home: homeSquad || { GOL: ['—'], DEF: ['—','—','—','—'], MEI: ['—','—','—'], ATA: ['—','—','—'] },
+    away: awaySquad || { GOL: ['—'], DEF: ['—','—','—','—'], MEI: ['—','—','—'], ATA: ['—','—','—'] },
+  };
+
+  // Melhor em campo: prioriza artilheiro do time que mais marcou, senão um meio/defensor do time vencedor
+  let motmTeam, motmList, motmRole;
+  if (hs >= as) { motmTeam = game.home; } else { motmTeam = game.away; }
+  const motmSquad = SQUADS[motmTeam];
+  if (motmSquad) {
+    const pool = goalDiff !== 0
+      ? [...motmSquad.ATA, ...motmSquad.MEI]
+      : [...motmSquad.MEI, ...motmSquad.DEF];
+    const idx = Math.floor(rnd() * pool.length);
+    motmList = pool;
+    const name = pool[idx];
+    motmRole = motmSquad.ATA.includes(name) ? 'Atacante' : motmSquad.MEI.includes(name) ? 'Meio-campista' : motmSquad.DEF.includes(name) ? 'Defensor' : 'Goleiro';
+    var motmName = name;
+    var motmAbbr = motmTeam;
+  } else {
+    var motmName = '—';
+    var motmAbbr = motmTeam;
+    motmRole = '—';
+  }
+  const motmRating = (7.6 + rnd() * 1.9 + Math.abs(goalDiff) * 0.15).toFixed(1);
+
+  // Mapa de calor: 9 manchas por time, concentradas conforme perfil de posse/gols
+  function buildHeatBlobs(possShare, isHome) {
+    const n = 9;
+    const blobs = [];
+    for (let i = 0; i < n; i++) {
+      // Mais posse → manchas um pouco mais adiantadas no campo do adversário
+      const forwardBias = (possShare - 50) / 100; // -0.16..0.16 aprox
+      const top = Math.min(92, Math.max(8, 50 - forwardBias * 60 + (rnd() * 70 - 35)));
+      const left = Math.min(90, Math.max(10, 50 + (rnd() * 70 - 35)));
+      const size = 22 + rnd() * 20;
+      const intensity = 0.18 + rnd() * 0.22;
+      blobs.push({ top, left, size, intensity });
+    }
+    return blobs;
+  }
+
+  return {
+    possH, possA,
+    shotsH, shotsA, onTargetH, onTargetA, offTargetH, offTargetA,
+    cornersH, cornersA, foulsH, foulsA, passAccH, passAccA,
+    lineup,
+    motm: { name: motmName, abbr: motmAbbr, role: motmRole, rating: motmRating },
+    heatHome: buildHeatBlobs(possH, true),
+    heatAway: buildHeatBlobs(possA, false),
+  };
+}
+
+function statBarsHtml(label, valH, valA, maxVal) {
+  const pctH = Math.round((valH / maxVal) * 100);
+  const pctA = Math.round((valA / maxVal) * 100);
+  return `
+    <div class="mm-stat-row">
+      <div class="mm-stat-label">${label}</div>
+      <div class="mm-stat-bars">
+        <span class="mm-stat-num h">${valH}</span>
+        <div class="mm-stat-track">
+          <div class="mm-stat-track-half h">
+            <div class="mm-stat-track-bg" style="position:relative;">
+              <div class="mm-stat-fill h" style="width:${pctH}%; position:absolute; right:0; top:0;"></div>
+            </div>
+          </div>
+          <div class="mm-stat-track-half a">
+            <div class="mm-stat-track-bg" style="position:relative;">
+              <div class="mm-stat-fill a" style="width:${pctA}%; position:absolute; left:0; top:0;"></div>
+            </div>
+          </div>
+        </div>
+        <span class="mm-stat-num a">${valA}</span>
+      </div>
+    </div>
+  `;
+}
+
+function heatmapPitchHtml(blobs, colorVar) {
+  return `
+    <div class="mm-heatmap-pitch">
+      ${blobs.map(b => `
+        <div class="mm-heat-cell" style="
+          top:${b.top}%; left:${b.left}%;
+          width:${b.size}%; height:${b.size * 0.8}%;
+          transform: translate(-50%,-50%);
+          background: radial-gradient(circle, ${colorVar.replace('ALPHA', b.intensity.toFixed(2))} 0%, transparent 72%);
+        "></div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function lineupPosBlock(title, count, players) {
+  return `
+    <div class="mm-lineup-pos-block">
+      <div class="mm-lineup-pos-title">
+        <span>${title}</span>
+        <span class="mm-lineup-pos-count">${count}</span>
+      </div>
+      <div class="mm-lineup-players">${players.map(p => `<span>${p}</span>`).join('')}</div>
+    </div>
+  `;
+}
+
+function openMatchDetail(gameIndex) {
+  const game = GAMES[gameIndex];
+  if (!game || game.status !== 'final') return;
+  const stats = buildMatchStats(game, gameIndex);
+
+  const hFlag = FLAGS[game.home] || '🏳';
+  const aFlag = FLAGS[game.away] || '🏳';
+  const hName = TEAM_NAMES[game.home] || game.home;
+  const aName = TEAM_NAMES[game.away] || game.away;
+  const maxShots = Math.max(stats.shotsH, stats.shotsA);
+  const maxCorners = Math.max(stats.cornersH, stats.cornersA, 1);
+  const maxFouls = Math.max(stats.foulsH, stats.foulsA, 1);
+
+  const modal = document.getElementById('match-modal');
+  const overlay = document.getElementById('overlay');
+
+  modal.innerHTML = `
+    <div class="mm-header">
+      <button class="mm-close" onclick="closeMatchDetail()">✕</button>
+      <div class="mm-meta">
+        <span>Grupo ${game.group}</span> · <span>${game.venue}, ${game.city}</span>
+      </div>
+      <div class="mm-scoreline">
+        <div class="mm-team">
+          <div class="mm-team-flag">${hFlag}</div>
+          <div class="mm-team-name">${hName}</div>
+        </div>
+        <div class="mm-score">${game.hs} – ${game.as}</div>
+        <div class="mm-team">
+          <div class="mm-team-flag">${aFlag}</div>
+          <div class="mm-team-name">${aName}</div>
+        </div>
+      </div>
+    </div>
+    <div class="mm-body">
+
+      <div class="mm-section">
+        <h4>Melhor em campo</h4>
+        <div class="mm-motm">
+          <div class="mm-motm-icon">⭐</div>
+          <div class="mm-motm-info">
+            <div class="mm-motm-name">${stats.motm.name}</div>
+            <div class="mm-motm-role">${stats.motm.role} · <span class="badge">${stats.motm.abbr}</span></div>
+          </div>
+          <div class="mm-motm-rating">${stats.motm.rating}</div>
+        </div>
+      </div>
+
+      <div class="mm-section">
+        <h4>Posse de bola</h4>
+        <div class="mm-possession-row">
+          <span class="mm-possession-val h">${stats.possH}%</span>
+          <div class="mm-possession-bar">
+            <div class="h-fill" style="width:${stats.possH}%"></div>
+            <div class="a-fill" style="width:${stats.possA}%"></div>
+          </div>
+          <span class="mm-possession-val a">${stats.possA}%</span>
+        </div>
+        <div class="mm-possession-labels">
+          <span>${game.home}</span>
+          <span>${game.away}</span>
+        </div>
+      </div>
+
+      <div class="mm-section">
+        <h4>Estatísticas do jogo</h4>
+        ${statBarsHtml('Finalizações totais', stats.shotsH, stats.shotsA, maxShots)}
+        ${statBarsHtml('Escanteios', stats.cornersH, stats.cornersA, maxCorners)}
+        ${statBarsHtml('Faltas cometidas', stats.foulsH, stats.foulsA, maxFouls)}
+        ${statBarsHtml('Precisão de passe (%)', stats.passAccH, stats.passAccA, 100)}
+      </div>
+
+      <div class="mm-section">
+        <h4>Chutes certos e errados (ataque)</h4>
+        <div class="mm-shots-grid">
+          <div class="mm-shots-team home">
+            <div class="mm-shots-team-name">${hFlag} ${game.home}</div>
+            <div class="mm-shots-line"><span class="lbl">No alvo</span><span class="val ok">${stats.onTargetH}</span></div>
+            <div class="mm-shots-line"><span class="lbl">Para fora</span><span class="val bad">${stats.offTargetH}</span></div>
+            <div class="mm-shots-line"><span class="lbl">Total</span><span class="val">${stats.shotsH}</span></div>
+          </div>
+          <div class="mm-shots-team away">
+            <div class="mm-shots-team-name">${aFlag} ${game.away}</div>
+            <div class="mm-shots-line"><span class="lbl">No alvo</span><span class="val ok">${stats.onTargetA}</span></div>
+            <div class="mm-shots-line"><span class="lbl">Para fora</span><span class="val bad">${stats.offTargetA}</span></div>
+            <div class="mm-shots-line"><span class="lbl">Total</span><span class="val">${stats.shotsA}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mm-section">
+        <h4>Mapa de calor</h4>
+        <div class="mm-heatmap-grid">
+          <div>
+            <div class="mm-heatmap-team-label h">${game.home}</div>
+            ${heatmapPitchHtml(stats.heatHome, 'rgba(93,173,226,ALPHA)')}
+          </div>
+          <div>
+            <div class="mm-heatmap-team-label a">${game.away}</div>
+            ${heatmapPitchHtml(stats.heatAway, 'rgba(212,168,67,ALPHA)')}
+          </div>
+        </div>
+      </div>
+
+      <div class="mm-section">
+        <h4>Escalação por posição</h4>
+        <div class="mm-lineup-grid">
+          <div>
+            <div class="mm-lineup-team-label h">${game.home}</div>
+            ${lineupPosBlock('Goleiro', stats.lineup.home.GOL.length, stats.lineup.home.GOL)}
+            ${lineupPosBlock('Zagueiros / laterais', stats.lineup.home.DEF.length, stats.lineup.home.DEF)}
+            ${lineupPosBlock('Meio-campo', stats.lineup.home.MEI.length, stats.lineup.home.MEI)}
+            ${lineupPosBlock('Ataque', stats.lineup.home.ATA.length, stats.lineup.home.ATA)}
+          </div>
+          <div>
+            <div class="mm-lineup-team-label a">${game.away}</div>
+            ${lineupPosBlock('Goleiro', stats.lineup.away.GOL.length, stats.lineup.away.GOL)}
+            ${lineupPosBlock('Zagueiros / laterais', stats.lineup.away.DEF.length, stats.lineup.away.DEF)}
+            ${lineupPosBlock('Meio-campo', stats.lineup.away.MEI.length, stats.lineup.away.MEI)}
+            ${lineupPosBlock('Ataque', stats.lineup.away.ATA.length, stats.lineup.away.ATA)}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  requestAnimationFrame(() => {
+    modal.classList.add('show');
+    overlay.classList.add('show');
+    modalOpen = true;
+  });
+  document.addEventListener('keydown', onMatchEsc);
+}
+
+function closeMatchDetail() {
+  const modal = document.getElementById('match-modal');
+  const overlay = document.getElementById('overlay');
+  modal.classList.remove('show');
+  if (!expandedGroup) overlay.classList.remove('show');
+  document.removeEventListener('keydown', onMatchEsc);
+  modalOpen = false;
+}
+
+function onMatchEsc(e) { if (e.key === 'Escape') closeMatchDetail(); }
+
+// ════════════════════════════════════════
 // TAB: GRUPOS (expansão flip)
 // ════════════════════════════════════════
 function renderGroups() {
@@ -1453,8 +2150,9 @@ function renderGroups() {
     const rows = sorted.map((t, i) => {
       const sg = t.gp - t.gc;
       const sgStr = sg > 0 ? `+${sg}` : `${sg}`;
+      const posClass = i === 0 ? 'pos-1st' : i === 1 ? 'pos-2nd' : '';
       return `
-        <tr class="${i < 2 ? 'qualify' : ''} ${i % 2 !== 0 ? 'row-odd' : ''}">
+        <tr class="${posClass} ${i % 2 !== 0 ? 'row-odd' : ''}">
           <td class="t-pos">${i+1}</td>
           <td class="t-team">${t.team}</td>
           <td class="num t-dim">${t.w}</td>
@@ -1704,73 +2402,4 @@ function openModal(id, type) {
   modal.innerHTML = `
     <div class="pm-header">
       <button class="pm-close" onclick="closeModal()">✕</button>
-      <div class="pm-avatar">${init}</div>
-      <div class="pm-name">${data.name}</div>
-      <div class="pm-sub">
-        <span class="badge">${data.abbr}</span>
-        <span>${data.team}</span>
-        ${data.rating ? `<span>· Nota ${data.rating.toFixed(1)}</span>` : ''}
-      </div>
-    </div>
-    <div class="pm-body">
-      ${statsHtml}
-      ${gamesHtml}
-      <div class="pm-section">
-        <h4>Perfil</h4>
-        <p class="pm-bio">${data.bio}</p>
-      </div>
-    </div>
-  `;
-
-  requestAnimationFrame(() => {
-    modal.classList.add('show');
-    overlay.classList.add('show');
-    modalOpen = true;
-  });
-  document.addEventListener('keydown', onModalEsc);
-}
-
-function closeModal() {
-  const modal   = document.getElementById('player-modal');
-  const overlay = document.getElementById('overlay');
-  modal.classList.remove('show');
-  if (!expandedGroup) overlay.classList.remove('show');
-  document.removeEventListener('keydown', onModalEsc);
-  modalOpen = false;
-}
-
-function onModalEsc(e) { if (e.key === 'Escape') closeModal(); }
-
-document.getElementById('overlay').addEventListener('click', () => {
-  closeGroup();
-  closeModal();
-});
-
-// ════════════════════════════════════════
-// REFRESH
-// ════════════════════════════════════════
-function handleRefresh() {
-  const btn = document.querySelector('.refresh-btn');
-  btn.classList.add('spinning');
-  setTimeout(() => btn.classList.remove('spinning'), 500);
-  showToast('Para dados novos, peça no chat: "atualiza a Copa"');
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => toast.classList.remove('show'), 3400);
-}
-
-// ════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════
-renderGames();
-renderGroups();
-renderScorers();
-renderPositions();
-</script>
-</body>
-</html>
+      <div class="pm-avatar">${i
