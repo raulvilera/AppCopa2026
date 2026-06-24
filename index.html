@@ -203,11 +203,21 @@
   }
   .match-card{
     flex: 0 0 auto;
-    min-width:150px;
+    min-width:158px;
     background: var(--field-deep);
     border:1px solid var(--line);
     border-radius:8px;
     padding:10px 12px;
+    cursor:pointer;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    touch-action: manipulation;
+  }
+  .match-card:not(.expanded):active{ transform: scale(0.985); }
+  .match-card-placeholder{ visibility:hidden; }
+  .matches-row.has-expanded .match-card:not(.expanded){
+    opacity:0.28;
+    filter: blur(1.5px) saturate(0.6);
+    pointer-events:none;
   }
   .match-card .grp{
     font-family:'Oswald'; font-size:10px; letter-spacing:0.1em;
@@ -220,7 +230,41 @@
   .match-card .status{
     font-size:10px; color: rgba(245,242,234,0.4); margin-top:6px; text-transform:uppercase; letter-spacing:0.05em;
   }
+  .match-card .venue{
+    font-size:10px; color: rgba(245,242,234,0.45); margin-top:3px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .match-card .venue .pin{ font-size:10px; }
   .status.live-tag{ color: var(--card-red); font-weight:600; }
+
+  /* EXPANSÃO DE JOGO (FLIP) */
+  .match-card.expanded{
+    position:fixed;
+    top:50%; left:50%;
+    width:min(92vw, 380px);
+    max-height:80vh;
+    z-index:1000;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+    overflow:auto;
+    cursor:default;
+    padding:18px 18px 20px;
+  }
+  .match-card .match-close{ display:none; }
+  .match-card.expanded .match-close{
+    display:flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:50%;
+    background: rgba(245,242,234,0.14); color: var(--chalk);
+    font-size:13px; line-height:1; cursor:pointer; border:none;
+    position:absolute; top:12px; right:12px;
+  }
+  .match-card.expanded .match-close:hover{ background: rgba(245,242,234,0.24); }
+  .match-card.expanded .grp{ font-size:12px; margin-bottom:14px; }
+  .match-card.expanded .match-row{ font-size:18px; padding:8px 0; }
+  .match-card.expanded .venue{
+    font-size:13px; margin-top:14px; padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .match-card.expanded .status{ font-size:12px; margin-top:10px; }
 
   /* GROUPS GRID */
   .groups-grid{
@@ -698,7 +742,7 @@
     <div class="update-panel">
       <div class="last-update">
         <span>Última atualização</span>
-        <strong id="update-time">23 jun 2026 · A–H pós-R2 · I–J pós-R2 · K parcial (Por-Uzb) · L pós-R1</strong>
+        <strong id="update-time">24 jun 2026 · A–C 3ª rodada em andamento/agendada · D–L conforme calendário oficial</strong>
       </div>
       <button id="refresh-btn" onclick="handleRefreshClick()">
         <span class="flip-icon"></span>
@@ -760,7 +804,7 @@
   </section>
 
   <footer>
-    Dados oficiais das rodadas disputadas até a manhã de 23 de junho de 2026 (horário de Brasília). Fonte: FIFA / Sportradar.
+    Dados oficiais das rodadas disputadas/agendadas até 24 de junho de 2026 (horário de Brasília). Fonte: FIFA / Sportradar.
   </footer>
 </div>
 
@@ -783,6 +827,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 
 // ============ ESTADO ============
 let expandedState = null;
+let expandedMatchState = null;
 let currentTab = 'classificacao';
 let currentPosition = 'GOL';
 
@@ -862,27 +907,28 @@ const standings = {
   ],
 };
 
+// Cada jogo agora tem "venue" (estádio/cidade-sede) com base no calendário oficial da FIFA.
 const recentMatches = [
-  {group:"L", home:"Panamá", away:"Croácia", status:"PRÓX · 24/06 00h"},
-  {group:"L", home:"Inglaterra", away:"Gana", status:"PRÓX · 23/06 21h"},
-  {group:"K", home:"Colômbia", away:"Congo (RD)", status:"PRÓX · 23/06 23h"},
-  {group:"B", home:"Suíça", away:"Canadá", status:"PRÓX · 24/06 20h"},
-  {group:"B", home:"Bósnia e Herzegovina", away:"Catar", status:"PRÓX · 24/06 20h"},
-  {group:"C", home:"Escócia", away:"Brasil", status:"PRÓX · 24/06 23h"},
-  {group:"C", home:"Marrocos", away:"Haiti", status:"PRÓX · 24/06 23h"},
-  {group:"A", home:"Tchéquia", away:"México", status:"PRÓX · 25/06 02h"},
-  {group:"A", home:"África do Sul", away:"Coreia do Sul", status:"PRÓX · 25/06 02h"},
-  {group:"K", home:"Portugal", away:"Uzbequistão", hs:5, as:0, status:"FINAL"},
-  {group:"J", home:"Argentina", away:"Áustria", hs:2, as:0, status:"FINAL"},
-  {group:"J", home:"Jordânia", away:"Argélia", hs:1, as:2, status:"FINAL"},
-  {group:"I", home:"França", away:"Iraque", hs:3, as:0, status:"FINAL"},
-  {group:"I", home:"Noruega", away:"Senegal", hs:3, as:2, status:"FINAL"},
-  {group:"G", home:"Nova Zelândia", away:"Egito", hs:1, as:3, status:"FINAL"},
-  {group:"H", home:"Uruguai", away:"Cabo Verde", hs:2, as:2, status:"FINAL"},
-  {group:"H", home:"Espanha", away:"Ar. Saudita", hs:4, as:0, status:"FINAL"},
-  {group:"F", home:"Tunísia", away:"Japão", hs:0, as:4, status:"FINAL"},
-  {group:"E", home:"Alemanha", away:"Costa do Marfim", hs:2, as:1, status:"FINAL"},
-  {group:"D", home:"Turquia", away:"Paraguai", hs:0, as:1, status:"FINAL"},
+  {group:"L", home:"Panamá", away:"Croácia", status:"PRÓX · 24/06 00h", venue:"BMO Field, Toronto (CAN)"},
+  {group:"L", home:"Inglaterra", away:"Gana", status:"PRÓX · 23/06 21h", venue:"Gillette Stadium, Boston (EUA)"},
+  {group:"K", home:"Colômbia", away:"Congo (RD)", status:"PRÓX · 23/06 23h", venue:"Estádio Akron, Guadalajara (MEX)"},
+  {group:"B", home:"Suíça", away:"Canadá", status:"PRÓX · 24/06 20h", venue:"BC Place, Vancouver (CAN)"},
+  {group:"B", home:"Bósnia e Herzegovina", away:"Catar", status:"PRÓX · 24/06 20h", venue:"Lumen Field, Seattle (EUA)"},
+  {group:"C", home:"Escócia", away:"Brasil", status:"PRÓX · 24/06 23h", venue:"Hard Rock Stadium, Miami (EUA)"},
+  {group:"C", home:"Marrocos", away:"Haiti", status:"PRÓX · 24/06 23h", venue:"Mercedes-Benz Stadium, Atlanta (EUA)"},
+  {group:"A", home:"Tchéquia", away:"México", status:"PRÓX · 25/06 02h", venue:"Estádio Azteca, Cidade do México (MEX)"},
+  {group:"A", home:"África do Sul", away:"Coreia do Sul", status:"PRÓX · 25/06 02h", venue:"Estádio BBVA, Monterrey (MEX)"},
+  {group:"K", home:"Portugal", away:"Uzbequistão", hs:5, as:0, status:"FINAL", venue:"NRG Stadium, Houston (EUA)"},
+  {group:"J", home:"Argentina", away:"Áustria", hs:2, as:0, status:"FINAL", venue:"SoFi Stadium, Los Angeles (EUA)"},
+  {group:"J", home:"Jordânia", away:"Argélia", hs:1, as:2, status:"FINAL", venue:"Levi's Stadium, São Francisco (EUA)"},
+  {group:"I", home:"França", away:"Iraque", hs:3, as:0, status:"FINAL", venue:"Lincoln Financial Field, Filadélfia (EUA)"},
+  {group:"I", home:"Noruega", away:"Senegal", hs:3, as:2, status:"FINAL", venue:"Gillette Stadium, Boston (EUA)"},
+  {group:"G", home:"Nova Zelândia", away:"Egito", hs:1, as:3, status:"FINAL", venue:"Mercedes-Benz Stadium, Atlanta (EUA)"},
+  {group:"H", home:"Uruguai", away:"Cabo Verde", hs:2, as:2, status:"FINAL", venue:"Hard Rock Stadium, Miami (EUA)"},
+  {group:"H", home:"Espanha", away:"Ar. Saudita", hs:4, as:0, status:"FINAL", venue:"AT&T Stadium, Dallas (EUA)"},
+  {group:"F", home:"Tunísia", away:"Japão", hs:0, as:4, status:"FINAL", venue:"Arrowhead Stadium, Kansas City (EUA)"},
+  {group:"E", home:"Alemanha", away:"Costa do Marfim", hs:2, as:1, status:"FINAL", venue:"MetLife Stadium, Nova York/NJ (EUA)"},
+  {group:"D", home:"Turquia", away:"Paraguai", hs:0, as:1, status:"FINAL", venue:"Lumen Field, Seattle (EUA)"},
 ];
 
 // ARTILHEIROS
@@ -1044,18 +1090,104 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============ RENDER: JOGOS ============
 function renderMatches(){
   const row = document.getElementById('matches-row');
-  row.innerHTML = recentMatches.map(m => {
+  row.innerHTML = recentMatches.map((m, i) => {
     const isLive = !!m.live;
     const hasScore = m.hs !== undefined;
     return `
-      <div class="match-card ${isLive ? 'live' : ''}">
+      <div class="match-card ${isLive ? 'live' : ''}" data-idx="${i}" onclick="toggleExpandMatch(this)">
+        <button class="match-close" onclick="event.stopPropagation(); closeExpandMatch();">✕</button>
         <div class="grp">Grupo ${m.group}</div>
         <div class="match-row"><span class="team">${m.home}</span><span class="score">${hasScore ? m.hs : ''}</span></div>
         <div class="match-row"><span class="team">${m.away}</span><span class="score">${hasScore ? m.as : ''}</span></div>
+        <div class="venue"><span class="pin">📍</span>${m.venue || ''}</div>
         <div class="status ${isLive ? 'live-tag' : ''}">${m.status}</div>
       </div>
     `;
   }).join('');
+}
+
+// ============ EXPANSÃO FLIP (jogos) ============
+function toggleExpandMatch(card){
+  if (expandedMatchState) return;
+  if (card.classList.contains('expanded')) return;
+
+  const row = document.getElementById('matches-row');
+  const backdrop = document.getElementById('overlay-backdrop');
+  const firstRect = card.getBoundingClientRect();
+  const firstCenterX = firstRect.left + firstRect.width / 2;
+  const firstCenterY = firstRect.top + firstRect.height / 2;
+
+  const placeholder = document.createElement('div');
+  placeholder.className = 'match-card-placeholder';
+  placeholder.style.width = firstRect.width + 'px';
+  placeholder.style.height = firstRect.height + 'px';
+  card.parentNode.insertBefore(placeholder, card);
+
+  row.classList.add('has-expanded');
+  card.classList.add('expanded');
+
+  const lastRect = card.getBoundingClientRect();
+  const finalCenterX = window.innerWidth / 2;
+  const finalCenterY = window.innerHeight / 2;
+  const scaleX = firstRect.width / lastRect.width;
+  const scaleY = firstRect.height / lastRect.height;
+  const dx = firstCenterX - finalCenterX;
+  const dy = firstCenterY - finalCenterY;
+
+  card.style.transition = 'none';
+  card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+  card.getBoundingClientRect();
+
+  requestAnimationFrame(() => {
+    card.style.transition = 'transform 0.38s cubic-bezier(0.22, 0.9, 0.25, 1), box-shadow 0.3s ease';
+    card.style.transform = 'translate(-50%, -50%)';
+  });
+
+  if (backdrop) backdrop.classList.add('show');
+
+  expandedMatchState = { card, placeholder };
+  document.addEventListener('keydown', onEscKeyMatch);
+}
+
+function closeExpandMatch(){
+  if (!expandedMatchState) return;
+  const { card, placeholder } = expandedMatchState;
+  const row = document.getElementById('matches-row');
+  const backdrop = document.getElementById('overlay-backdrop');
+
+  const curRect = card.getBoundingClientRect();
+  const targetRect = placeholder.getBoundingClientRect();
+  const targetCenterX = targetRect.left + targetRect.width / 2;
+  const targetCenterY = targetRect.top + targetRect.height / 2;
+  const curCenterX = window.innerWidth / 2;
+  const curCenterY = window.innerHeight / 2;
+  const scaleX = targetRect.width / curRect.width;
+  const scaleY = targetRect.height / curRect.height;
+  const dx = targetCenterX - curCenterX;
+  const dy = targetCenterY - curCenterY;
+
+  card.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease';
+  card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+
+  if (backdrop && !expandedState) backdrop.classList.remove('show');
+
+  const onEnd = (e) => {
+    if (e && e.target !== card) return;
+    card.classList.remove('expanded');
+    card.style.transition = '';
+    card.style.transform = '';
+    row.classList.remove('has-expanded');
+    placeholder.parentNode.insertBefore(card, placeholder);
+    placeholder.remove();
+    card.removeEventListener('transitionend', onEnd);
+    document.removeEventListener('keydown', onEscKeyMatch);
+    expandedMatchState = null;
+  };
+  card.addEventListener('transitionend', onEnd);
+}
+
+function onEscKeyMatch(e){
+  if (e.key === 'Escape') closeExpandMatch();
 }
 
 // ============ RENDER: GRUPOS ============
@@ -1163,7 +1295,7 @@ function closeExpand(){
   card.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease';
   card.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
 
-  if (backdrop) backdrop.classList.remove('show');
+  if (backdrop && !expandedMatchState) backdrop.classList.remove('show');
 
   const onEnd = (e) => {
     if (e && e.target !== card) return;
@@ -1358,7 +1490,7 @@ function closePlayerModal(){
   const modal = document.getElementById('player-modal');
   const backdrop = document.getElementById('overlay-backdrop');
   modal.classList.remove('show');
-  backdrop.classList.remove('show');
+  if (!expandedState && !expandedMatchState) backdrop.classList.remove('show');
   document.removeEventListener('keydown', onModalEsc);
 }
 function onModalEsc(e){ if (e.key === 'Escape') closePlayerModal(); }
@@ -1366,6 +1498,7 @@ function onModalEsc(e){ if (e.key === 'Escape') closePlayerModal(); }
 // ============ INIT ============
 document.getElementById('overlay-backdrop').addEventListener('click', () => {
   closeExpand();
+  closeExpandMatch();
   closePlayerModal();
 });
 
