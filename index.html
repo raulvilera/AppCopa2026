@@ -2272,4 +2272,63 @@ function openModal(id, type) {
       '<button class="pm-close" onclick="closeModal()">&#10005;</button>' +
       '<div class="pm-avatar">' + init + '</div>' +
       '<div class="pm-name">' + data.name + '</div>' +
-      '<div class="pm-sub"><span class="badge">' + data.abbr + '</span><span>' + data.team + '
+      '<div class="pm-sub"><span class="badge">' + data.abbr + '</span><span>' + data.team + '</span>' +
+      (data.rating ? '<span>&middot; Nota ' + data.rating.toFixed(1) + '</span>' : '') + '</div>' +
+    '</div>' +
+    '<div class="pm-body">' + statsHtml + gamesHtml +
+      '<div class="pm-section"><h4>Perfil</h4><p class="pm-bio">' + data.bio + '</p></div>' +
+    '</div>';
+
+  requestAnimationFrame(function() {
+    modal.classList.add('show');
+    overlay.classList.add('show');
+    modalOpen = true;
+  });
+  document.addEventListener('keydown', onModalEsc);
+}
+
+function closeModal() {
+  var modal = document.getElementById('player-modal');
+  var overlay = document.getElementById('overlay');
+  modal.classList.remove('show');
+  if (!groupModalOpen) overlay.classList.remove('show');
+  document.removeEventListener('keydown', onModalEsc);
+  modalOpen = false;
+}
+function onModalEsc(e) { if (e.key === 'Escape') closeModal(); }
+
+// Overlay: fecha qualquer modal aberto
+document.getElementById('overlay').addEventListener('click', function() {
+  closeGroupModal();
+  closeModal();
+  closeMatchDetail();
+});
+
+// ════════════════════════════════════════
+// REFRESH
+// ════════════════════════════════════════
+function handleRefresh() {
+  var btn = document.querySelector('.refresh-btn');
+  btn.classList.add('spinning');
+  setTimeout(function() { btn.classList.remove('spinning'); }, 500);
+  showToast('Para dados novos, peca no chat: "atualiza a Copa"');
+}
+
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(function() { toast.classList.remove('show'); }, 3400);
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderGames();
+renderGroups();
+renderScorers();
+renderPositions();
+</script>
+</body>
+</html>
