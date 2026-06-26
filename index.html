@@ -2294,15 +2294,7 @@ var _cacheTs    = 0;
 var _autoRefresh = null;
 var CACHE_TTL   = 3 * 60 * 1000;
 
-function getStatusInfo(fix) {
-  var s = fix.fixture.status.short;
-  if (s === 'FT' || s === 'AET' || s === 'PEN') return {type:'final', label:'Final'};
-  if (['1H','2H','HT','ET','BT','P'].indexOf(s) >= 0) {
-    var min = fix.fixture.status.elapsed || '';
-    return {type:'live', label:'&#9679; ' + (min ? min + "'" : 'Ao Vivo')};
-  }
-  return {type:'scheduled', label:''};
-}
+// getStatusInfo removido — formato openfootball já vem normalizado do scores.js
 
 function fixtureToGame(f) {
   // Formato openfootball — campos já normalizados pelo scores.js
@@ -2387,8 +2379,7 @@ async function loadData(manual) {
 
     // Auto-refresh se houver jogo ao vivo
     var hasLive = (json.fixtures||[]).some(function(f){
-      var s = f.fixture.status.short;
-      return ['1H','2H','HT','ET','BT'].indexOf(s) >= 0;
+      return f.status === 'live';
     });
     clearInterval(_autoRefresh);
     if (hasLive) {
