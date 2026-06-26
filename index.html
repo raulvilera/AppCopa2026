@@ -2401,17 +2401,23 @@ async function loadData(manual) {
 }
 
 function applyData(json) {
-  API_GAMES     = (json.fixtures || []).map(fixtureToGame);
-  API_STANDINGS = parseStandings(json.standings || []);
-  API_SCORERS   = parseScorers(json.scorers || []);
-  // Sobrescreve variáveis usadas pelas funções de render existentes
-  GAMES     = API_GAMES;
-  STANDINGS = Object.keys(API_STANDINGS).length ? API_STANDINGS : STANDINGS;
-  SCORERS   = API_SCORERS.length ? API_SCORERS : SCORERS;
-  renderGames();
-  renderGroups();
-  renderScorers();
-  renderPositions();
+  try {
+    API_GAMES     = (json.fixtures || []).map(fixtureToGame);
+    API_STANDINGS = parseStandings(json.standings || {});
+    API_SCORERS   = parseScorers(json.scorers || []);
+    GAMES     = API_GAMES.length ? API_GAMES : GAMES;
+    STANDINGS = Object.keys(API_STANDINGS).length ? API_STANDINGS : STANDINGS;
+    SCORERS   = API_SCORERS.length ? API_SCORERS : SCORERS;
+    renderGames();
+    renderGroups();
+    renderScorers();
+    renderPositions();
+    console.log('[copa] Dados aplicados:', API_GAMES.length, 'jogos,', Object.keys(API_STANDINGS).length, 'grupos');
+  } catch(e) {
+    console.error('[copa] Erro em applyData:', e);
+    var c = document.getElementById('games-container');
+    if (c) c.innerHTML = '<div style="padding:20px;color:#C0392B;font-family:Barlow Condensed,sans-serif">⚠ Erro interno: ' + e.message + '</div>';
+  }
 }
 
 function updateTimestamp(json) {
