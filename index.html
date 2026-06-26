@@ -2297,28 +2297,19 @@ function getStatusInfo(fix) {
 }
 
 function fixtureToGame(f) {
-  // Formato openfootball
-  var home  = f.home  || '?';
-  var away  = f.away  || '?';
-  var round = f.round || '';
-  var grpMatch = round.match(/Group\s+([A-L])/i) || round.match(/\b([A-L])\b/);
-  var grp = grpMatch ? grpMatch[1].toUpperCase() : '?';
-  // Extrair número da rodada
-  var rNum = 1;
-  if (round.match(/2/)) rNum = 2;
-  if (round.match(/3/)) rNum = 3;
+  // Formato openfootball — campos já normalizados pelo scores.js
   return {
-    r:      rNum,
-    group:  grp,
-    home:   home,
-    away:   away,
-    hs:     f.homeScore,
-    as:     f.awayScore,
+    r:      f.r      || 1,
+    group:  f.group  || '?',
+    home:   f.home   || '?',
+    away:   f.away   || '?',
+    hs:     f.hs,
+    as:     f.as,
     status: f.status || 'scheduled',
-    date:   f.date || '',
-    time:   f.time || '',
-    venue:  f.venue || '',
-    city:   f.city  || '',
+    date:   f.date   || '',
+    time:   f.time   || '',
+    venue:  f.venue  || '',
+    city:   f.city   || '',
   };
 }
 
