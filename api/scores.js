@@ -1,31 +1,44 @@
 // api/scores.js — Vercel Serverless Function (CommonJS)
-// Usa openfootball/worldcup.json — 100% gratuito, sem chave, atualizado diariamente
+// Fonte: openfootball/worldcup.json — gratuito, sem chave, atualizado diariamente
 
-const BASE_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026';
+const RAW_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 let cache = { data: null, ts: 0 };
 
-async function ghFetch(file) {
-  const res = await fetch(`${BASE_URL}/${file}`);
-  if (!res.ok) throw new Error(`GitHub fetch error ${res.status}: ${file}`);
-  return res.json();
-}
+// Mapa nome completo EN → código 3 letras FIFA
+const NAME_TO_CODE = {
+  'Mexico':'MEX','South Africa':'RSA','Czech Republic':'CZE','South Korea':'KOR',
+  'Canada':'CAN','Switzerland':'SUI','Bosnia & Herzegovina':'BIH','Bosnia and Herzegovina':'BIH','Qatar':'QAT',
+  'Brazil':'BRA','Haiti':'HTI','Scotland':'SCO','Morocco':'MAR',
+  'USA':'USA','United States':'USA','Turkey':'TUR','Australia':'AUS','Paraguay':'PAR',
+  'Germany':'GER','Ivory Coast':'CIV',"Côte d'Ivoire":'CIV','Ecuador':'ECU','Curaçao':'CUW','Curacao':'CUW',
+  'Netherlands':'NED','Japan':'JPN','Sweden':'SWE','Tunisia':'TUN',
+  'Belgium':'BEL','Iran':'IRN','New Zealand':'NZL','Egypt':'EGY',
+  'Spain':'ESP','Uruguay':'URU','Cape Verde':'CPV','Saudi Arabia':'KSA',
+  'France':'FRA','Senegal':'SEN','Norway':'NOR','Iraq':'IRQ',
+  'Argentina':'ARG','Algeria':'DZA','Austria':'AUT','Jordan':'JOR',
+  'Portugal':'POR','DR Congo':'COD','Colombia':'COL','Uzbekistan':'UZB',
+  'England':'ENG','Ghana':'GHA','Panama':'PAN','Croatia':'CRO',
+};
+function code(name) { return NAME_TO_CODE[name] || name.substring(0,3).toUpperCase(); }
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Debug
+  // Debug: /api/scores?debug=1
   if (req.query && req.query.debug === '1') {
     try {
-      const test = await ghFetch('worldcup.json');
+      const r   = await fetch(RAW_URL);
+      const wc  = await r.json();
+      const m   = wc.matches ? wc.matches[0] : null;
       return res.status(200).json({
         debug: true,
-        rounds: test.rounds ? test.rounds.length : 0,
-        firstMatch: test.rounds && test.rounds[0] && test.rounds[0].matches ? test.rounds[0].matches[0] : null,
-        source: BASE_URL + '/worldcup.json',
+        totalMatches: wc.matches ? wc.matches.length : 0,
+        firstMatch: m,
+        source: RAW_URL,
       });
     } catch(e) {
       return res.status(200).json({ debug: true, error: e.message });
@@ -38,36 +51,42 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // openfootball tem worldcup.json com rounds + matches
-    const wc = await ghFetch('worldcup.json');
+    const r  = await fetch(RAW_URL);
+    if (!r.ok) throw new Error('GitHub HTTP ' + r.status);
+    const wc = await r.json();
 
-    // Normalizar fixtures
-    const fixtures = [];
-    (wc.rounds || []).forEach(function(round) {
-      (round.matches || []).forEach(function(m) {
-        fixtures.push({
-          round:    round.name || '',
-          date:     m.date || '',
-          time:     m.time || '',
-          home:     m.team1 ? (m.team1.code || m.team1.name) : '?',
-          away:     m.team2 ? (m.team2.code || m.team2.name) : '?',
-          homeName: m.team1 ? m.team1.name : '?',
-          awayName: m.team2 ? m.team2.name : '?',
-          homeScore: m.score && m.score.ft ? m.score.ft[0] : null,
-          awayScore: m.score && m.score.ft ? m.score.ft[1] : null,
-          group:    m.group || round.name || '',
-          venue:    m.stadium ? (m.stadium.name || '') : '',
-          city:     m.city || '',
-          status:   (m.score && m.score.ft) ? 'final' : 'scheduled',
-        });
-      });
+    // Normalizar fixtures — formato openfootball usa "matches" flat
+    const fixtures = (wc.matches || []).map(function(m) {
+      var homeCode = code(m.team1);
+      var awayCode = code(m.team2);
+      var hasFT    = m.score && m.score.ft;
+      // Extrair rodada numérica do campo "round" ex: "Matchday 1", "Matchday 8", "Matchday 14"
+      var rMatch = (m.round || '').match(/(\d+)/);
+      var rNum   = rMatch ? Math.ceil(parseInt(rMatch[1]) / 4) : 1; // Matchdays 1-4=R1, 5-8=R2, 9-12=R3
+      return {
+        r:         rNum,
+        group:     m.group ? m.group.replace('Group ','') : '?',
+        home:      homeCode,
+        away:      awayCode,
+        homeName:  m.team1,
+        awayName:  m.team2,
+        hs:        hasFT ? m.score.ft[0] : null,
+        as:        hasFT ? m.score.ft[1] : null,
+        status:    hasFT ? 'final' : 'scheduled',
+        date:      m.date  || '',
+        time:      m.time  || '',
+        venue:     '',
+        city:      m.ground || '',
+        goals1:    m.goals1 || [],
+        goals2:    m.goals2 || [],
+      };
     });
 
-    // Calcular standings a partir dos resultados
+    // Calcular standings
     const standings = calcStandings(fixtures);
 
-    // Calcular artilheiros a partir dos scorers
-    const scorers = calcScorers(wc);
+    // Calcular artilheiros
+    const scorers = calcScorers(fixtures);
 
     const payload = {
       fixtures,
@@ -83,76 +102,54 @@ module.exports = async function handler(req, res) {
 
   } catch (err) {
     console.error('[copa-api] ERRO:', err.message);
-    if (cache.data) {
-      return res.status(200).json({ ...cache.data, cached: true, fallback: true });
-    }
+    if (cache.data) return res.status(200).json({ ...cache.data, cached: true, fallback: true });
     return res.status(500).json({ error: err.message });
   }
 };
 
-// Calcula standings dos grupos a partir dos fixtures
 function calcStandings(fixtures) {
   const groups = {};
-
   fixtures.forEach(function(f) {
-    if (f.status !== 'final') return;
-    var grp = extractGroup(f.group || f.round);
-    if (!grp) return;
-
+    if (f.status !== 'final' || f.group === '?') return;
+    var grp = f.group;
     if (!groups[grp]) groups[grp] = {};
-
     [
-      {code: f.home, name: f.homeName, gf: f.homeScore, gc: f.awayScore},
-      {code: f.away, name: f.awayName, gf: f.awayScore, gc: f.homeScore},
+      {code:f.home, name:f.homeName, gf:f.hs, gc:f.as},
+      {code:f.away, name:f.awayName, gf:f.as, gc:f.hs},
     ].forEach(function(t) {
       if (!groups[grp][t.code]) {
-        groups[grp][t.code] = {team: t.name || t.code, abbr: t.code, w:0, d:0, l:0, pts:0, gp:0, gc:0};
+        groups[grp][t.code] = {team:t.name||t.code, abbr:t.code, w:0,d:0,l:0,pts:0,gp:0,gc:0};
       }
       var s = groups[grp][t.code];
       s.gp += t.gf;
       s.gc += t.gc;
-      if (t.gf > t.gc)      { s.w++; s.pts += 3; }
-      else if (t.gf === t.gc){ s.d++; s.pts += 1; }
-      else                   { s.l++; }
+      if      (t.gf > t.gc)  { s.w++; s.pts += 3; }
+      else if (t.gf === t.gc) { s.d++; s.pts += 1; }
+      else                    { s.l++; }
     });
   });
-
-  // Converter para formato esperado pelo index.html e ordenar
   var result = {};
   Object.keys(groups).sort().forEach(function(grp) {
-    var teams = Object.values(groups[grp]);
-    teams.sort(function(a,b) {
+    result[grp] = Object.values(groups[grp]).sort(function(a,b) {
       if (b.pts !== a.pts) return b.pts - a.pts;
-      var sgA = a.gp - a.gc, sgB = b.gp - b.gc;
-      if (sgB !== sgA) return sgB - sgA;
-      return b.gp - a.gp;
+      return (b.gp-b.gc) - (a.gp-a.gc) || b.gp - a.gp;
     });
-    result[grp] = teams;
   });
   return result;
 }
 
-function extractGroup(str) {
-  if (!str) return null;
-  // "Group A", "Grupo A", "Group Stage - 1" etc
-  var m = str.match(/Group\s+([A-L])/i) || str.match(/Grupo\s+([A-L])/i) || str.match(/\b([A-L])\b/);
-  return m ? m[1].toUpperCase() : null;
-}
-
-function calcScorers(wc) {
+function calcScorers(fixtures) {
   var map = {};
-  (wc.rounds || []).forEach(function(round) {
-    (round.matches || []).forEach(function(m) {
-      (m.goals || []).forEach(function(g) {
-        if (!g.name) return;
-        var teamCode = g.team ? (g.team.code || g.team.name || '?') : '?';
-        var key = g.name + '|' + teamCode;
-        if (!map[key]) map[key] = {name: g.name, abbr: teamCode, team: teamCode, goals: 0, assists: 0};
-        if (!g.score) map[key].goals++; // gol normal (own goals têm score: 'og')
+  fixtures.forEach(function(f) {
+    if (f.status !== 'final') return;
+    [[f.goals1, f.home, f.homeName],[f.goals2, f.away, f.awayName]].forEach(function(pair) {
+      (pair[0]||[]).forEach(function(g) {
+        if (!g.name || g.owngoal) return;
+        var key = g.name + '|' + pair[1];
+        if (!map[key]) map[key] = {name:g.name, abbr:pair[1], team:pair[2], goals:0};
+        map[key].goals++;
       });
     });
   });
-  return Object.values(map)
-    .sort(function(a,b){ return b.goals - a.goals; })
-    .slice(0, 15);
+  return Object.values(map).sort(function(a,b){return b.goals-a.goals}).slice(0,15);
 }
