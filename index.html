@@ -1487,92 +1487,50 @@ footer {
 
 <script>
 // ════════════════════════════════════════
-// DADOS — JOGOS
+// DADOS — carregados via API-Football
 // ════════════════════════════════════════
-var GAMES = [
-  // RODADA 1
-  {r:1,group:'B',home:'CAN',away:'QAT',hs:5,as:0,status:'final',date:'2026-06-12',time:'21h',venue:'BMO Field',city:'Toronto, CAN'},
-  {r:1,group:'A',home:'MEX',away:'RSA',hs:2,as:0,status:'final',date:'2026-06-13',time:'22h',venue:'Estadio Akron',city:'Guadalajara, MEX'},
-  {r:1,group:'C',home:'BRA',away:'MAR',hs:1,as:1,status:'final',date:'2026-06-13',time:'19h',venue:'Hard Rock Stadium',city:'Miami, EUA'},
-  {r:1,group:'C',home:'SCO',away:'HTI',hs:1,as:0,status:'final',date:'2026-06-14',time:'19h',venue:'AT&T Stadium',city:'Dallas, EUA'},
-  {r:1,group:'D',home:'USA',away:'TUR',hs:3,as:0,status:'final',date:'2026-06-15',time:'22h',venue:'SoFi Stadium',city:'Los Angeles, EUA'},
-  {r:1,group:'D',home:'AUS',away:'PAR',hs:1,as:0,status:'final',date:'2026-06-15',time:'19h',venue:'Lumen Field',city:'Seattle, EUA'},
-  {r:1,group:'E',home:'GER',away:'CUW',hs:7,as:1,status:'final',date:'2026-06-16',time:'16h',venue:'MetLife Stadium',city:'Nova York/NJ, EUA'},
-  {r:1,group:'E',home:'CIV',away:'ECU',hs:1,as:0,status:'final',date:'2026-06-16',time:'22h',venue:'Gillette Stadium',city:'Boston, EUA'},
-  {r:1,group:'F',home:'NED',away:'SWE',hs:3,as:3,status:'final',date:'2026-06-17',time:'16h',venue:'Arrowhead Stadium',city:'Kansas City, EUA'},
-  {r:1,group:'F',home:'JPN',away:'TUN',hs:2,as:1,status:'final',date:'2026-06-17',time:'22h',venue:'Lincoln Financial Field',city:'Filadelfia, EUA'},
-  {r:1,group:'G',home:'BEL',away:'IRN',hs:0,as:0,status:'final',date:'2026-06-18',time:'16h',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA'},
-  {r:1,group:'G',home:'NZL',away:'EGY',hs:2,as:2,status:'final',date:'2026-06-18',time:'22h',venue:'NRG Stadium',city:'Houston, EUA'},
-  {r:1,group:'H',home:'ESP',away:'KSA',hs:4,as:0,status:'final',date:'2026-06-19',time:'16h',venue:'BC Place',city:'Vancouver, CAN'},
-  {r:1,group:'H',home:'URU',away:'CPV',hs:1,as:1,status:'final',date:'2026-06-19',time:'22h',venue:'Estadio Azteca',city:'Cidade do Mexico, MEX'},
-  {r:1,group:'I',home:'FRA',away:'SEN',hs:2,as:1,status:'final',date:'2026-06-20',time:'16h',venue:'Rose Bowl',city:'Los Angeles, EUA'},
-  {r:1,group:'I',home:'NOR',away:'IRQ',hs:4,as:1,status:'final',date:'2026-06-20',time:'22h',venue:'Levi\'s Stadium',city:'Sao Francisco, EUA'},
-  {r:1,group:'J',home:'ARG',away:'DZA',hs:3,as:1,status:'final',date:'2026-06-21',time:'16h',venue:'Estadio BBVA',city:'Monterrey, MEX'},
-  {r:1,group:'J',home:'AUT',away:'JOR',hs:3,as:2,status:'final',date:'2026-06-21',time:'22h',venue:'SoFi Stadium',city:'Los Angeles, EUA'},
-  {r:1,group:'K',home:'POR',away:'COD',hs:1,as:1,status:'final',date:'2026-06-21',time:'19h',venue:'NRG Stadium',city:'Houston, EUA'},
-  {r:1,group:'K',home:'COL',away:'UZB',hs:3,as:1,status:'final',date:'2026-06-21',time:'22h',venue:'Lumen Field',city:'Seattle, EUA'},
-  {r:1,group:'L',home:'ENG',away:'CRO',hs:4,as:2,status:'final',date:'2026-06-22',time:'19h',venue:'Gillette Stadium',city:'Boston, EUA'},
-  {r:1,group:'B',home:'SUI',away:'BIH',hs:4,as:1,status:'final',date:'2026-06-22',time:'22h',venue:'MetLife Stadium',city:'Nova York/NJ, EUA'},
-  {r:1,group:'A',home:'CZE',away:'KOR',hs:1,as:1,status:'final',date:'2026-06-22',time:'16h',venue:'AT&T Stadium',city:'Dallas, EUA'},
-  // RODADA 2
-  {r:2,group:'H',home:'URU',away:'CPV',hs:2,as:2,status:'final',date:'2026-06-21',time:'19h00',venue:'Hard Rock Stadium',city:'Miami, EUA'},
-  {r:2,group:'G',home:'NZL',away:'EGY',hs:1,as:3,status:'final',date:'2026-06-21',time:'22h00',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA'},
-  {r:2,group:'J',home:'ARG',away:'AUT',hs:2,as:0,status:'final',date:'2026-06-22',time:'14h00',venue:'SoFi Stadium',city:'Los Angeles, EUA'},
-  {r:2,group:'I',home:'FRA',away:'IRQ',hs:3,as:0,status:'final',date:'2026-06-22',time:'18h00',venue:'Lincoln Financial Field',city:'Filadelfia, EUA'},
-  {r:2,group:'I',home:'NOR',away:'SEN',hs:3,as:2,status:'final',date:'2026-06-22',time:'21h00',venue:'Gillette Stadium',city:'Boston, EUA'},
-  {r:2,group:'J',home:'JOR',away:'DZA',hs:1,as:2,status:'final',date:'2026-06-23',time:'00h00',venue:'Levi\'s Stadium',city:'Sao Francisco, EUA'},
-  {r:2,group:'K',home:'POR',away:'UZB',hs:5,as:0,status:'final',date:'2026-06-23',time:'14h00',venue:'NRG Stadium',city:'Houston, EUA'},
-  {r:2,group:'L',home:'ENG',away:'GHA',hs:0,as:0,status:'final',date:'2026-06-23',time:'17h00',venue:'Gillette Stadium',city:'Boston, EUA'},
-  {r:2,group:'L',home:'PAN',away:'CRO',hs:0,as:1,status:'final',date:'2026-06-23',time:'20h00',venue:'BMO Field',city:'Toronto, CAN'},
-  {r:2,group:'K',home:'COL',away:'COD',hs:1,as:0,status:'final',date:'2026-06-23',time:'23h00',venue:'Estadio Akron',city:'Guadalajara, MEX'},
-  // RODADA 3
-  {r:2,group:'C',home:'MAR',away:'SCO',hs:1,as:0,status:'final',date:'2026-06-19',time:'19h00',venue:'AT&T Stadium',city:'Dallas, EUA'},
-  {r:2,group:'C',home:'BRA',away:'HTI',hs:3,as:0,status:'final',date:'2026-06-19',time:'22h00',venue:'Hard Rock Stadium',city:'Miami, EUA'},
-  {r:3,group:'B',home:'SUI',away:'CAN',hs:2,as:1,status:'final',date:'2026-06-24',time:'16h00',venue:'BC Place',city:'Vancouver, CAN'},
-  {r:3,group:'B',home:'BIH',away:'QAT',hs:3,as:1,status:'final',date:'2026-06-24',time:'16h00',venue:'Lumen Field',city:'Seattle, EUA'},
-  {r:3,group:'C',home:'SCO',away:'BRA',hs:0,as:3,status:'final',date:'2026-06-24',time:'19h00',venue:'Hard Rock Stadium',city:'Miami, EUA'},
-  {r:3,group:'C',home:'MAR',away:'HTI',hs:4,as:2,status:'final',date:'2026-06-24',time:'19h00',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA'},
-  {r:3,group:'A',home:'CZE',away:'MEX',hs:0,as:3,status:'final',date:'2026-06-24',time:'22h00',venue:'Estadio Azteca',city:'Cidade do Mexico, MEX'},
-  {r:3,group:'A',home:'RSA',away:'KOR',hs:1,as:0,status:'final',date:'2026-06-24',time:'22h00',venue:'Estadio BBVA',city:'Monterrey, MEX'},
-  {r:3,group:'E',home:'ECU',away:'GER',hs:null,as:null,status:'scheduled',date:'2026-06-25',time:'17h00',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',prob:{h:25.1,d:23.6,a:51.3}},
-  {r:3,group:'E',home:'CUW',away:'CIV',hs:null,as:null,status:'scheduled',date:'2026-06-25',time:'17h00',venue:'AT&T Stadium',city:'Dallas, EUA',prob:{h:4.6,d:10.8,a:84.6}},
-  {r:3,group:'F',home:'TUN',away:'NED',hs:null,as:null,status:'scheduled',date:'2026-06-25',time:'20h00',venue:'Arrowhead Stadium',city:'Kansas City, EUA',prob:{h:3.9,d:9.6,a:86.5}},
-  {r:3,group:'F',home:'JPN',away:'SWE',hs:null,as:null,status:'scheduled',date:'2026-06-25',time:'20h00',venue:'Levi\'s Stadium',city:'Sao Francisco, EUA',prob:{h:49.8,d:27.5,a:22.7}},
-];
 
-// CLASSIFICACAO
-var STANDINGS = {
-  A:[{team:'Mexico',abbr:'MEX',w:3,d:0,l:0,pts:9,gp:6,gc:0},{team:'Africa do Sul',abbr:'RSA',w:1,d:1,l:1,pts:4,gp:2,gc:3},{team:'Coreia do Sul',abbr:'KOR',w:1,d:0,l:2,pts:3,gp:4,gc:4},{team:'Tchequia',abbr:'CZE',w:0,d:1,l:2,pts:1,gp:2,gc:7}],
-  B:[{team:'Suica',abbr:'SUI',w:2,d:1,l:0,pts:7,gp:7,gc:3},{team:'Bosnia e Herzegovina',abbr:'BIH',w:1,d:1,l:1,pts:4,gp:5,gc:6},{team:'Canada',abbr:'CAN',w:1,d:1,l:1,pts:4,gp:8,gc:7},{team:'Catar',abbr:'QAT',w:0,d:1,l:2,pts:1,gp:2,gc:6}],
-  C:[{team:'Brasil',abbr:'BRA',w:2,d:1,l:0,pts:7,gp:7,gc:1},{team:'Marrocos',abbr:'MAR',w:2,d:1,l:0,pts:7,gp:6,gc:3},{team:'Escocia',abbr:'SCO',w:1,d:0,l:2,pts:3,gp:2,gc:4},{team:'Haiti',abbr:'HTI',w:0,d:0,l:3,pts:0,gp:2,gc:9}],
-  D:[{team:'Estados Unidos',abbr:'USA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Australia',abbr:'AUS',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Paraguai',abbr:'PAR',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Turquia',abbr:'TUR',w:0,d:0,l:2,pts:0,gp:0,gc:3}],
-  E:[{team:'Alemanha',abbr:'GER',w:2,d:0,l:0,pts:6,gp:9,gc:2},{team:'Costa do Marfim',abbr:'CIV',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Equador',abbr:'ECU',w:0,d:1,l:1,pts:1,gp:0,gc:1},{team:'Curacao',abbr:'CUW',w:0,d:1,l:1,pts:1,gp:1,gc:7}],
-  F:[{team:'Holanda',abbr:'NED',w:1,d:1,l:0,pts:4,gp:7,gc:3},{team:'Japao',abbr:'JPN',w:1,d:1,l:0,pts:4,gp:6,gc:2},{team:'Suecia',abbr:'SWE',w:1,d:0,l:1,pts:3,gp:6,gc:6},{team:'Tunisia',abbr:'TUN',w:0,d:0,l:2,pts:0,gp:1,gc:9}],
-  G:[{team:'Egito',abbr:'EGY',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Ira',abbr:'IRN',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Belgica',abbr:'BEL',w:0,d:2,l:0,pts:2,gp:1,gc:1},{team:'Nova Zelandia',abbr:'NZL',w:0,d:1,l:1,pts:1,gp:3,gc:5}],
-  H:[{team:'Espanha',abbr:'ESP',w:1,d:1,l:0,pts:4,gp:4,gc:0},{team:'Uruguai',abbr:'URU',w:0,d:2,l:0,pts:2,gp:3,gc:3},{team:'Cabo Verde',abbr:'CPV',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Arabia Saudita',abbr:'KSA',w:0,d:1,l:1,pts:1,gp:1,gc:5}],
-  I:[{team:'Franca',abbr:'FRA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Noruega',abbr:'NOR',w:2,d:0,l:0,pts:6,gp:7,gc:3},{team:'Senegal',abbr:'SEN',w:0,d:0,l:2,pts:0,gp:3,gc:6},{team:'Iraque',abbr:'IRQ',w:0,d:0,l:2,pts:0,gp:1,gc:7}],
-  J:[{team:'Argentina',abbr:'ARG',w:2,d:0,l:0,pts:6,gp:5,gc:0},{team:'Austria',abbr:'AUT',w:1,d:0,l:1,pts:3,gp:3,gc:3},{team:'Algeria',abbr:'DZA',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Jordania',abbr:'JOR',w:0,d:0,l:2,pts:0,gp:2,gc:5}],
-  K:[{team:'Colombia',abbr:'COL',w:2,d:0,l:0,pts:6,gp:4,gc:1},{team:'Portugal',abbr:'POR',w:1,d:1,l:0,pts:4,gp:6,gc:1},{team:'Congo (RD)',abbr:'COD',w:0,d:1,l:1,pts:1,gp:1,gc:1},{team:'Uzbequistao',abbr:'UZB',w:0,d:0,l:2,pts:0,gp:1,gc:8}],
-  L:[{team:'Inglaterra',abbr:'ENG',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Gana',abbr:'GHA',w:1,d:1,l:0,pts:4,gp:1,gc:0},{team:'Croacia',abbr:'CRO',w:1,d:0,l:1,pts:3,gp:3,gc:4},{team:'Panama',abbr:'PAN',w:0,d:0,l:2,pts:0,gp:0,gc:2}],
+// Dados dinâmicos: preenchidos por loadData()
+var API_GAMES     = [];   // fixtures da API
+var API_STANDINGS = {};   // standings por grupo
+var API_SCORERS   = [];   // artilheiros da API
+
+// Mapa nome EN → código 3 letras
+var CODE_MAP = {
+  'Mexico':'MEX','South Africa':'RSA','Czech Republic':'CZE','Korea Republic':'KOR',
+  'Canada':'CAN','Switzerland':'SUI','Bosnia and Herzegovina':'BIH','Qatar':'QAT',
+  'Brazil':'BRA','Haiti':'HTI','Scotland':'SCO','Morocco':'MAR',
+  'United States':'USA','Turkey':'TUR','Australia':'AUS','Paraguay':'PAR',
+  'Germany':'GER','Ivory Coast':'CIV',"Cote d\'Ivoire":'CIV','Ecuador':'ECU','Curacao':'CUW',
+  'Netherlands':'NED','Sweden':'SWE','Japan':'JPN','Tunisia':'TUN',
+  'Belgium':'BEL','Iran':'IRN','New Zealand':'NZL','Egypt':'EGY',
+  'Spain':'ESP','Uruguay':'URU','Cape Verde':'CPV','Saudi Arabia':'KSA',
+  'France':'FRA','Senegal':'SEN','Norway':'NOR','Iraq':'IRQ',
+  'Argentina':'ARG','Algeria':'DZA','Austria':'AUT','Jordan':'JOR',
+  'Portugal':'POR','DR Congo':'COD','Colombia':'COL','Uzbekistan':'UZB',
+  'England':'ENG','Ghana':'GHA','Panama':'PAN','Croatia':'CRO',
 };
+function getCode(name) { return CODE_MAP[name] || name.substring(0,3).toUpperCase(); }
 
-// ARTILHEIROS
-var SCORERS = [
-  {id:'haaland',name:'Erling Haaland',team:'Noruega',abbr:'NOR',goals:5,assists:0,shots:13,minutes:180,bio:'Hat-trick na estreia contra o Iraque e mais 2 gols na vitoria sobre o Senegal. Favorito a Chuteira de Ouro.',games:[{opp:'Iraque',perf:'3 gols'},{opp:'Senegal',perf:'2 gols'}]},
-  {id:'mbappe',name:'Kylian Mbappe',team:'Franca',abbr:'FRA',goals:4,assists:1,shots:11,minutes:180,bio:'Capitao frances. Dois gols contra o Senegal e mais dois contra o Iraque.',games:[{opp:'Senegal',perf:'2 gols, 1 assist'},{opp:'Iraque',perf:'2 gols'}]},
-  {id:'musiala',name:'Jamal Musiala',team:'Alemanha',abbr:'GER',goals:4,assists:1,shots:9,minutes:180,bio:'Meia-atacante de 22 anos. Eleito o melhor em campo nas duas rodadas.',games:[{opp:'Curacao',perf:'1 gol, 1 assist'},{opp:'Costa do Marfim',perf:'2 gols'}]},
-  {id:'messi',name:'Lionel Messi',team:'Argentina',abbr:'ARG',goals:3,assists:2,shots:8,minutes:180,bio:'Tornou-se o maior artilheiro da historia das Copas (18 gols) ao marcar contra a Austria.',games:[{opp:'Algeria',perf:'1 gol, 2 assist'},{opp:'Austria',perf:'2 gols'}]},
-  {id:'davies',name:'Alphonso Davies',team:'Canada',abbr:'CAN',goals:2,assists:3,shots:5,minutes:180,bio:'Lider de assistencias na Copa. Decisivo nas vitorias canadenses.',games:[{opp:'Catar',perf:'1 gol, 2 assist'},{opp:'Suica',perf:'1 gol, 1 assist'}]},
-  {id:'vinicius',name:'Vinicius Junior',team:'Brasil',abbr:'BRA',goals:2,assists:1,shots:6,minutes:180,bio:'Camisa 10 do Brasil. Lider em dribles certos da Copa (14).',games:[{opp:'Haiti',perf:'1 gol, 1 assist'},{opp:'Marrocos',perf:'1 gol'}]},
-  {id:'gakpo',name:'Cody Gakpo',team:'Holanda',abbr:'NED',goals:2,assists:2,shots:7,minutes:180,bio:'Atacante do Liverpool. Participou de 4 dos 7 gols holandeses.',games:[{opp:'Suecia',perf:'1 gol, 1 assist'},{opp:'Tunisia',perf:'1 gol, 1 assist'}]},
-  {id:'yamal',name:'Lamine Yamal',team:'Espanha',abbr:'ESP',goals:2,assists:2,shots:5,minutes:180,bio:'Prodigio de 18 anos. 4 participacoes nos 4 gols espanhois.',games:[{opp:'Arabia Saudita',perf:'1 gol, 1 assist'},{opp:'Cabo Verde',perf:'1 gol, 1 assist'}]},
-  {id:'salah',name:'Mohamed Salah',team:'Egito',abbr:'EGY',goals:2,assists:1,shots:6,minutes:180,bio:'Capitao egípcio, decisivo na virada sobre a Nova Zelandia.',games:[{opp:'Nova Zelandia',perf:'2 gols'},{opp:'Ira',perf:'1 assist'}]},
-  {id:'palmer',name:'Cole Palmer',team:'Inglaterra',abbr:'ENG',goals:2,assists:0,shots:5,minutes:90,bio:'Dois chutes cirurgicos contra a Croacia na estreia.',games:[{opp:'Croacia',perf:'2 gols'}]},
-  {id:'julian',name:'Julian Alvarez',team:'Argentina',abbr:'ARG',goals:2,assists:0,shots:4,minutes:90,bio:'Dois gols na estreia contra a Algeria.',games:[{opp:'Algeria',perf:'2 gols'}]},
-  {id:'ronaldo',name:'Cristiano Ronaldo',team:'Portugal',abbr:'POR',goals:1,assists:1,shots:7,minutes:180,bio:'Capitao portugues. Decisivo na goleada sobre o Uzbequistao.',games:[{opp:'Congo (RD)',perf:'sem gol'},{opp:'Uzbequistao',perf:'1 gol, 1 assist'}]},
-];
+// Fallback — dados estáticos usados antes do fetch completar
+// (os mesmos que estavam hardcoded antes)
+var GAMES = [];
+var STANDINGS = {
+  A:[{team:'México',abbr:'MEX',w:3,d:0,l:0,pts:9,gp:6,gc:0},{team:'África do Sul',abbr:'RSA',w:1,d:1,l:1,pts:4,gp:2,gc:3},{team:'Coreia do Sul',abbr:'KOR',w:1,d:0,l:2,pts:3,gp:4,gc:4},{team:'Tchéquia',abbr:'CZE',w:0,d:1,l:2,pts:1,gp:2,gc:7}],
+  B:[{team:'Suíça',abbr:'SUI',w:2,d:1,l:0,pts:7,gp:7,gc:3},{team:'Bósnia',abbr:'BIH',w:1,d:1,l:1,pts:4,gp:5,gc:6},{team:'Canadá',abbr:'CAN',w:1,d:1,l:1,pts:4,gp:8,gc:7},{team:'Catar',abbr:'QAT',w:0,d:1,l:2,pts:1,gp:2,gc:6}],
+  C:[{team:'Brasil',abbr:'BRA',w:2,d:1,l:0,pts:7,gp:7,gc:1},{team:'Marrocos',abbr:'MAR',w:2,d:1,l:0,pts:7,gp:6,gc:3},{team:'Escócia',abbr:'SCO',w:1,d:0,l:2,pts:3,gp:2,gc:4},{team:'Haiti',abbr:'HTI',w:0,d:0,l:3,pts:0,gp:2,gc:9}],
+  D:[{team:'Estados Unidos',abbr:'USA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Austrália',abbr:'AUS',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Paraguai',abbr:'PAR',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Turquia',abbr:'TUR',w:0,d:0,l:2,pts:0,gp:0,gc:3}],
+  E:[{team:'Alemanha',abbr:'GER',w:2,d:0,l:0,pts:6,gp:9,gc:2},{team:'C. Marfim',abbr:'CIV',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Equador',abbr:'ECU',w:0,d:1,l:1,pts:1,gp:0,gc:1},{team:'Curaçao',abbr:'CUW',w:0,d:1,l:1,pts:1,gp:1,gc:7}],
+  F:[{team:'Holanda',abbr:'NED',w:1,d:1,l:0,pts:4,gp:7,gc:3},{team:'Japão',abbr:'JPN',w:1,d:1,l:0,pts:4,gp:6,gc:2},{team:'Suécia',abbr:'SWE',w:1,d:0,l:1,pts:3,gp:6,gc:6},{team:'Tunísia',abbr:'TUN',w:0,d:0,l:2,pts:0,gp:1,gc:9}],
+  G:[{team:'Egito',abbr:'EGY',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Irã',abbr:'IRN',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Bélgica',abbr:'BEL',w:0,d:2,l:0,pts:2,gp:1,gc:1},{team:'Nova Zelândia',abbr:'NZL',w:0,d:1,l:1,pts:1,gp:3,gc:5}],
+  H:[{team:'Espanha',abbr:'ESP',w:1,d:1,l:0,pts:4,gp:4,gc:0},{team:'Uruguai',abbr:'URU',w:0,d:2,l:0,pts:2,gp:3,gc:3},{team:'Cabo Verde',abbr:'CPV',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Ar. Saudita',abbr:'KSA',w:0,d:1,l:1,pts:1,gp:1,gc:5}],
+  I:[{team:'França',abbr:'FRA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Noruega',abbr:'NOR',w:2,d:0,l:0,pts:6,gp:7,gc:3},{team:'Senegal',abbr:'SEN',w:0,d:0,l:2,pts:0,gp:3,gc:6},{team:'Iraque',abbr:'IRQ',w:0,d:0,l:2,pts:0,gp:1,gc:7}],
+  J:[{team:'Argentina',abbr:'ARG',w:2,d:0,l:0,pts:6,gp:5,gc:0},{team:'Áustria',abbr:'AUT',w:1,d:0,l:1,pts:3,gp:3,gc:3},{team:'Argélia',abbr:'DZA',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Jordânia',abbr:'JOR',w:0,d:0,l:2,pts:0,gp:2,gc:5}],
+  K:[{team:'Colômbia',abbr:'COL',w:2,d:0,l:0,pts:6,gp:4,gc:1},{team:'Portugal',abbr:'POR',w:1,d:1,l:0,pts:4,gp:6,gc:1},{team:'Congo (RD)',abbr:'COD',w:0,d:1,l:1,pts:1,gp:1,gc:1},{team:'Uzbequistão',abbr:'UZB',w:0,d:0,l:2,pts:0,gp:1,gc:8}],
+  L:[{team:'Inglaterra',abbr:'ENG',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Gana',abbr:'GHA',w:1,d:1,l:0,pts:4,gp:1,gc:0},{team:'Croácia',abbr:'CRO',w:1,d:0,l:1,pts:3,gp:3,gc:4},{team:'Panamá',abbr:'PAN',w:0,d:0,l:2,pts:0,gp:0,gc:2}],
+};
+var SCORERS = [];
 
-// CRAQUES POR POSICAO
 var POSITIONS = [
   {id:'GOL',label:'Goleiro',ico:'&#129380;'},
   {id:'DEF',label:'Defensor',ico:'&#128737;'},
@@ -1703,6 +1661,7 @@ var SQUADS = {
   PAN:{GOL:['Orlando Mosquera'],DEF:['Michael Murillo','Fidel Escobar','Eric Davis','Andres Andrade'],MEI:['Anibal Godoy','Adalberto Carrasquilla','Edgar Barcenas'],ATA:['Ismael Diaz','Cesar Blackman','Jose Fajardo']},
   CRO:{GOL:['Dominik Livakovic'],DEF:['Josip Stanisic','Josko Gvardiol','Josko Sutalo','Borna Sosa'],MEI:['Luka Modric','Mateo Kovacic','Mario Pasalic'],ATA:['Luka Ivanusec','Andrej Kramaric','Bruno Petkovic']},
 };
+
 
 // ════════════════════════════════════════
 // ESTADO
@@ -2308,10 +2267,7 @@ document.getElementById('overlay').addEventListener('click', function() {
 // REFRESH
 // ════════════════════════════════════════
 function handleRefresh() {
-  var btn = document.querySelector('.refresh-btn');
-  btn.classList.add('spinning');
-  setTimeout(function() { btn.classList.remove('spinning'); }, 500);
-  showToast('Para dados novos, peca no chat: "atualiza a Copa"');
+  loadData(true);
 }
 
 function showToast(msg) {
@@ -2323,12 +2279,178 @@ function showToast(msg) {
 }
 
 // ════════════════════════════════════════
+// API — fetch e integração
+// ════════════════════════════════════════
+var _apiCache   = null;
+var _cacheTs    = 0;
+var _autoRefresh = null;
+var CACHE_TTL   = 3 * 60 * 1000;
+
+function getStatusInfo(fix) {
+  var s = fix.fixture.status.short;
+  if (s === 'FT' || s === 'AET' || s === 'PEN') return {type:'final', label:'Final'};
+  if (['1H','2H','HT','ET','BT','P'].indexOf(s) >= 0) {
+    var min = fix.fixture.status.elapsed || '';
+    return {type:'live', label:'&#9679; ' + (min ? min + "'" : 'Ao Vivo')};
+  }
+  return {type:'scheduled', label:''};
+}
+
+function fixtureToGame(f) {
+  var home = getCode(f.teams.home.name);
+  var away = getCode(f.teams.away.name);
+  var si   = getStatusInfo(f);
+  var dt   = new Date(f.fixture.date);
+  var hm   = dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  var dateStr = dt.toISOString().substring(0,10);
+  // Extrair letra do grupo do round string ex: "Group Stage - 1" ou "Group A"
+  var round = f.league.round || '';
+  var grpMatch = round.match(/Group\s+([A-L])/i) || round.match(/([A-L])/);
+  var grp = grpMatch ? grpMatch[1].toUpperCase() : '?';
+  var rNum = 1;
+  if (round.match(/- 2/)) rNum = 2;
+  if (round.match(/- 3/)) rNum = 3;
+  return {
+    r: rNum,
+    group: grp,
+    home: home,
+    away: away,
+    hs: f.goals.home,
+    as: f.goals.away,
+    status: si.type,
+    date: dateStr,
+    time: hm,
+    venue: f.fixture.venue ? (f.fixture.venue.name || '') : '',
+    city:  f.fixture.venue ? (f.fixture.venue.city || '') : '',
+    _liveLabel: si.label,
+  };
+}
+
+function parseStandings(standingsResp) {
+  var result = {};
+  if (!standingsResp || !standingsResp.length) return result;
+  var allGroups = standingsResp[0].league.standings || [];
+  allGroups.forEach(function(groupArr) {
+    if (!groupArr.length) return;
+    var letter = (groupArr[0].group || '').replace(/Group\s+/i,'').replace(/Grupo\s+/i,'').trim();
+    result[letter] = groupArr.map(function(t) {
+      var code = getCode(t.team.name);
+      return {
+        team: TEAM_NAMES[code] || t.team.name,
+        abbr: code,
+        w: t.all.win,
+        d: t.all.draw,
+        l: t.all.lose,
+        pts: t.points,
+        gp: t.all.goals ? t.all.goals.for : 0,
+        gc: t.all.goals ? t.all.goals.against : 0,
+      };
+    });
+  });
+  return result;
+}
+
+function parseScorers(scorersResp) {
+  if (!scorersResp || !scorersResp.length) return [];
+  return scorersResp.slice(0,15).map(function(item, i) {
+    var p    = item.player;
+    var stat = item.statistics && item.statistics[0] ? item.statistics[0] : {};
+    var code = stat.team ? getCode(stat.team.name) : '???';
+    return {
+      id:      'api_' + i,
+      name:    p.name || '—',
+      team:    TEAM_NAMES[code] || (stat.team ? stat.team.name : ''),
+      abbr:    code,
+      goals:   stat.goals ? (stat.goals.total || 0) : 0,
+      assists: stat.goals ? (stat.goals.assists || 0) : 0,
+      shots:   stat.shots ? (stat.shots.total || 0) : 0,
+      minutes: stat.games ? (stat.games.minutes || 0) : 0,
+      bio:     (p.nationality || '') + (p.age ? ', ' + p.age + ' anos' : ''),
+      games:   [],
+    };
+  });
+}
+
+async function loadData(manual) {
+  if (manual) {
+    var btn = document.querySelector('.refresh-btn');
+    if (btn) { btn.classList.add('spinning'); setTimeout(function(){btn.classList.remove('spinning')},600); }
+  }
+
+  // Cache local no browser
+  var now = Date.now();
+  if (_apiCache && (now - _cacheTs) < CACHE_TTL) {
+    applyData(_apiCache);
+    if (manual) showToast('Dados em cache — próxima busca em breve.');
+    return;
+  }
+
+  try {
+    var res = await fetch('/api/scores');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    _apiCache = json;
+    _cacheTs  = now;
+    applyData(json);
+    updateTimestamp(json);
+
+    // Auto-refresh se houver jogo ao vivo
+    var hasLive = (json.fixtures||[]).some(function(f){
+      var s = f.fixture.status.short;
+      return ['1H','2H','HT','ET','BT'].indexOf(s) >= 0;
+    });
+    clearInterval(_autoRefresh);
+    if (hasLive) {
+      _autoRefresh = setInterval(function(){loadData(false)},60000);
+      showToast('&#9679; Jogo ao vivo! Atualizando a cada 1 min.');
+    }
+  } catch(err) {
+    console.error('[copa-api]', err.message);
+    if (manual) showToast('Erro: ' + err.message + ' — usando dados em cache.');
+    // Se não tiver dado nenhum ainda, renderiza vazio
+    if (!_apiCache) {
+      renderGames();
+      renderGroups();
+      renderScorers();
+    }
+  }
+}
+
+function applyData(json) {
+  API_GAMES     = (json.fixtures || []).map(fixtureToGame);
+  API_STANDINGS = parseStandings(json.standings || []);
+  API_SCORERS   = parseScorers(json.scorers || []);
+  // Sobrescreve variáveis usadas pelas funções de render existentes
+  GAMES     = API_GAMES;
+  STANDINGS = Object.keys(API_STANDINGS).length ? API_STANDINGS : STANDINGS;
+  SCORERS   = API_SCORERS.length ? API_SCORERS : SCORERS;
+  renderGames();
+  renderGroups();
+  renderScorers();
+  renderPositions();
+}
+
+function updateTimestamp(json) {
+  var el = document.querySelector('.last-update strong');
+  if (!el) return;
+  var d = new Date();
+  el.textContent = d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) +
+    ' · ' + d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) +
+    (json.cached ? ' ⚡ cache' : ' 🟢 ao vivo');
+}
+
+// ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
+// Render inicial com dados hardcoded (fallback)
 renderGames();
 renderGroups();
 renderScorers();
 renderPositions();
+// Busca dados reais
+loadData(false);
+// Auto-refresh a cada 3 min
+setInterval(function(){ loadData(false); }, CACHE_TTL);
 </script>
 </body>
 </html>
