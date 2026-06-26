@@ -1,9 +1,7 @@
-// Service worker da Copa 2026 — Classificação
-// Estratégia: cache do "app shell" (HTML, ícones). Sempre tenta rede primeiro
-// quando possível, com fallback pro cache. Isso garante que o app abre
-// mesmo sem internet, mostrando a última versão salva no aparelho.
+// Service worker da Copa 2026
+// v3 — força limpeza do cache antigo
 
-const CACHE_NAME = "copa2026-cache-v1";
+const CACHE_NAME = "copa2026-cache-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -35,6 +33,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // Nunca cachear a API
+  if (event.request.url.includes("/api/")) return;
 
   event.respondWith(
     fetch(event.request)
