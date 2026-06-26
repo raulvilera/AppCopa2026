@@ -1,48 +1,34 @@
 // api/scores.js — Vercel Serverless Function (CommonJS)
+// Usa openfootball/worldcup.json — 100% gratuito, sem chave, atualizado diariamente
 
-const API_KEY  = process.env.API_FOOTBALL_KEY;
-const BASE_URL = 'https://v3.football.api-sports.io';
-const LEAGUE   = 1;
-const SEASON   = 2026;
-const CACHE_TTL = 3 * 60 * 1000; // 3 minutos
+const BASE_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 let cache = { data: null, ts: 0 };
 
-async function apiFetch(path) {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'x-apisports-key': API_KEY },
-  });
-  const json = await res.json();
-  console.log(`[API] ${path} → status:${res.status} results:${json.results} errors:${JSON.stringify(json.errors)}`);
-  if (json.errors && Object.keys(json.errors).length > 0) {
-    throw new Error(`API error: ${JSON.stringify(json.errors)}`);
-  }
-  return json;
+async function ghFetch(file) {
+  const res = await fetch(`${BASE_URL}/${file}`);
+  if (!res.ok) throw new Error(`GitHub fetch error ${res.status}: ${file}`);
+  return res.json();
 }
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Rota de debug: /api/scores?debug=1
+  // Debug
   if (req.query && req.query.debug === '1') {
     try {
-      const test = await apiFetch(`/fixtures?league=${LEAGUE}&season=${SEASON}&last=3`);
+      const test = await ghFetch('worldcup.json');
       return res.status(200).json({
         debug: true,
-        apiKey: API_KEY ? `${API_KEY.substring(0,8)}...` : 'NAO CONFIGURADA',
-        errors: test.errors,
-        results: test.results,
-        sample: test.response ? test.response[0] : null,
+        rounds: test.rounds ? test.rounds.length : 0,
+        firstMatch: test.rounds && test.rounds[0] && test.rounds[0].matches ? test.rounds[0].matches[0] : null,
+        source: BASE_URL + '/worldcup.json',
       });
     } catch(e) {
-      return res.status(200).json({
-        debug: true,
-        error: e.message,
-        apiKey: API_KEY ? `${API_KEY.substring(0,8)}...` : 'NAO CONFIGURADA',
-      });
+      return res.status(200).json({ debug: true, error: e.message });
     }
   }
 
@@ -52,23 +38,44 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const [fixturesData, standingsData, scorersData] = await Promise.all([
-      apiFetch(`/fixtures?league=${LEAGUE}&season=${SEASON}`),
-      apiFetch(`/standings?league=${LEAGUE}&season=${SEASON}`),
-      apiFetch(`/players/topscorers?league=${LEAGUE}&season=${SEASON}`),
-    ]);
+    // openfootball tem worldcup.json com rounds + matches
+    const wc = await ghFetch('worldcup.json');
+
+    // Normalizar fixtures
+    const fixtures = [];
+    (wc.rounds || []).forEach(function(round) {
+      (round.matches || []).forEach(function(m) {
+        fixtures.push({
+          round:    round.name || '',
+          date:     m.date || '',
+          time:     m.time || '',
+          home:     m.team1 ? (m.team1.code || m.team1.name) : '?',
+          away:     m.team2 ? (m.team2.code || m.team2.name) : '?',
+          homeName: m.team1 ? m.team1.name : '?',
+          awayName: m.team2 ? m.team2.name : '?',
+          homeScore: m.score && m.score.ft ? m.score.ft[0] : null,
+          awayScore: m.score && m.score.ft ? m.score.ft[1] : null,
+          group:    m.group || round.name || '',
+          venue:    m.stadium ? (m.stadium.name || '') : '',
+          city:     m.city || '',
+          status:   (m.score && m.score.ft) ? 'final' : 'scheduled',
+        });
+      });
+    });
+
+    // Calcular standings a partir dos resultados
+    const standings = calcStandings(fixtures);
+
+    // Calcular artilheiros a partir dos scorers
+    const scorers = calcScorers(wc);
 
     const payload = {
-      fixtures:  fixturesData.response  || [],
-      standings: standingsData.response || [],
-      scorers:   scorersData.response   || [],
-      meta: {
-        fixtures:  fixturesData.results,
-        standings: standingsData.results,
-        scorers:   scorersData.results,
-      },
+      fixtures,
+      standings,
+      scorers,
       fetchedAt: new Date().toISOString(),
       cached: false,
+      source: 'openfootball',
     };
 
     cache = { data: payload, ts: Date.now() };
@@ -82,3 +89,70 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// Calcula standings dos grupos a partir dos fixtures
+function calcStandings(fixtures) {
+  const groups = {};
+
+  fixtures.forEach(function(f) {
+    if (f.status !== 'final') return;
+    var grp = extractGroup(f.group || f.round);
+    if (!grp) return;
+
+    if (!groups[grp]) groups[grp] = {};
+
+    [
+      {code: f.home, name: f.homeName, gf: f.homeScore, gc: f.awayScore},
+      {code: f.away, name: f.awayName, gf: f.awayScore, gc: f.homeScore},
+    ].forEach(function(t) {
+      if (!groups[grp][t.code]) {
+        groups[grp][t.code] = {team: t.name || t.code, abbr: t.code, w:0, d:0, l:0, pts:0, gp:0, gc:0};
+      }
+      var s = groups[grp][t.code];
+      s.gp += t.gf;
+      s.gc += t.gc;
+      if (t.gf > t.gc)      { s.w++; s.pts += 3; }
+      else if (t.gf === t.gc){ s.d++; s.pts += 1; }
+      else                   { s.l++; }
+    });
+  });
+
+  // Converter para formato esperado pelo index.html e ordenar
+  var result = {};
+  Object.keys(groups).sort().forEach(function(grp) {
+    var teams = Object.values(groups[grp]);
+    teams.sort(function(a,b) {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      var sgA = a.gp - a.gc, sgB = b.gp - b.gc;
+      if (sgB !== sgA) return sgB - sgA;
+      return b.gp - a.gp;
+    });
+    result[grp] = teams;
+  });
+  return result;
+}
+
+function extractGroup(str) {
+  if (!str) return null;
+  // "Group A", "Grupo A", "Group Stage - 1" etc
+  var m = str.match(/Group\s+([A-L])/i) || str.match(/Grupo\s+([A-L])/i) || str.match(/\b([A-L])\b/);
+  return m ? m[1].toUpperCase() : null;
+}
+
+function calcScorers(wc) {
+  var map = {};
+  (wc.rounds || []).forEach(function(round) {
+    (round.matches || []).forEach(function(m) {
+      (m.goals || []).forEach(function(g) {
+        if (!g.name) return;
+        var teamCode = g.team ? (g.team.code || g.team.name || '?') : '?';
+        var key = g.name + '|' + teamCode;
+        if (!map[key]) map[key] = {name: g.name, abbr: teamCode, team: teamCode, goals: 0, assists: 0};
+        if (!g.score) map[key].goals++; // gol normal (own goals têm score: 'og')
+      });
+    });
+  });
+  return Object.values(map)
+    .sort(function(a,b){ return b.goals - a.goals; })
+    .slice(0, 15);
+}
