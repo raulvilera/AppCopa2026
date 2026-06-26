@@ -1571,14 +1571,22 @@ var STARS = {
 
 // CHAVEAMENTO
 var BRACKET = [
-  {matchup:'Oitavas 1',date:'29 jun',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',seed1:'1o Grupo I',team1:'Franca',seed2:'2o Grupo H',team2:'Uruguai / Cabo Verde',note:''},
-  {matchup:'Oitavas 2',date:'29 jun',venue:'Arrowhead Stadium',city:'Kansas City, EUA',seed1:'1o Grupo J',team1:'Argentina',seed2:'2o Grupo G',team2:'Ira / Belgica',note:''},
-  {matchup:'Oitavas 3',date:'30 jun',venue:'SoFi Stadium',city:'Los Angeles, EUA',seed1:'1o Grupo I',team1:'Noruega',seed2:'2o Grupo J',team2:'Austria / Algeria',note:''},
-  {matchup:'Oitavas 4',date:'30 jun',venue:'Hard Rock Stadium',city:'Miami, EUA',seed1:'1o Grupo D',team1:'Estados Unidos',seed2:'2o Grupo E',team2:'Costa do Marfim',note:''},
-  {matchup:'Oitavas 5',date:'01 jul',venue:'AT&T Stadium',city:'Dallas, EUA',seed1:'1o Grupo K',team1:'Colombia',seed2:'2o Grupo L',team2:'Inglaterra / Gana',note:''},
-  {matchup:'Oitavas 6',date:'01 jul',venue:'BC Place',city:'Vancouver, CAN',seed1:'1o Grupo E',team1:'Alemanha',seed2:'2o Grupo D',team2:'Australia / Paraguai',note:''},
-  {matchup:'Oitavas 7',date:'02 jul',venue:'Gillette Stadium',city:'Boston, EUA',seed1:'1o Grupo A',team1:'Mexico',seed2:'2o Grupo B',team2:'Canada / Suica',note:'A definir apos 3a rodada'},
-  {matchup:'Oitavas 8',date:'02 jul',venue:'Lumen Field',city:'Seattle, EUA',seed1:'1o Grupo C',team1:'Brasil / Marrocos',seed2:'2o Grupo K',team2:'Portugal',note:'A definir apos 3a rodada'},
+  {matchup:'Oitavas 1',date:'29 jun',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',seed1:'1o Grupo A',team1:'México',seed2:'2o Grupo B',team2:'Bósnia',note:''},
+  {matchup:'Oitavas 2',date:'29 jun',venue:'Hard Rock Stadium',city:'Miami, EUA',seed1:'1o Grupo B',team1:'Suíça',seed2:'2o Grupo A',team2:'África do Sul',note:''},
+  {matchup:'Oitavas 3',date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',seed1:'1o Grupo C',team1:'Brasil',seed2:'2o Grupo D',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 4',date:'30 jun',venue:'AT&T Stadium',city:'Dallas, EUA',seed1:'1o Grupo D',team1:'A definir',seed2:'2o Grupo C',team2:'Marrocos',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 5',date:'01 jul',venue:'SoFi Stadium',city:'Los Angeles, EUA',seed1:'1o Grupo E',team1:'A definir',seed2:'2o Grupo F',team2:'A definir',note:'Aguardando Rodadas 3'},
+  {matchup:'Oitavas 6',date:'01 jul',venue:'Arrowhead Stadium',city:'Kansas City, EUA',seed1:'1o Grupo F',team1:'A definir',seed2:'2o Grupo E',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 7',date:'02 jul',venue:'Levi's Stadium',city:'São Francisco, EUA',seed1:'1o Grupo G',team1:'A definir',seed2:'2o Grupo H',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 8',date:'02 jul',venue:'BC Place',city:'Vancouver, CAN',seed1:'1o Grupo H',team1:'A definir',seed2:'2o Grupo G',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 9',date:'03 jul',venue:'Rose Bowl',city:'Los Angeles, EUA',seed1:'1o Grupo I',team1:'A definir',seed2:'2o Grupo J',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 10',date:'03 jul',venue:'Estadio Akron',city:'Guadalajara, MEX',seed1:'1o Grupo J',team1:'Argentina',seed2:'2o Grupo I',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 11',date:'04 jul',venue:'NRG Stadium',city:'Houston, EUA',seed1:'1o Grupo K',team1:'A definir',seed2:'2o Grupo L',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 12',date:'04 jul',venue:'Lumen Field',city:'Seattle, EUA',seed1:'1o Grupo L',team1:'A definir',seed2:'2o Grupo K',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Oitavas 13',date:'05 jul',venue:'Gillette Stadium',city:'Boston, EUA',seed1:'Melhor 3o (A/B/C)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Oitavas 14',date:'05 jul',venue:'Estadio BBVA',city:'Monterrey, MEX',seed1:'Melhor 3o (D/E/F)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Oitavas 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',seed1:'Melhor 3o (G/H/I)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Oitavas 16',date:'06 jul',venue:'Estadio Azteca',city:'Cidade do México, MEX',seed1:'Melhor 3o (J/K/L)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
 ];
 
 // FLAGS
@@ -2434,6 +2442,12 @@ renderPositions();
 loadData(false);
 // Auto-refresh a cada 3 min
 setInterval(function(){ loadData(false); }, CACHE_TTL);
+</script>
+<script>
+// Suprimir botão PWA "Adicionar à tela inicial" do Chrome
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+});
 </script>
 </body>
 </html>
