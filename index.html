@@ -2297,79 +2297,71 @@ function getStatusInfo(fix) {
 }
 
 function fixtureToGame(f) {
-  var home = getCode(f.teams.home.name);
-  var away = getCode(f.teams.away.name);
-  var si   = getStatusInfo(f);
-  var dt   = new Date(f.fixture.date);
-  var hm   = dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  var dateStr = dt.toISOString().substring(0,10);
-  // Extrair letra do grupo do round string ex: "Group Stage - 1" ou "Group A"
-  var round = f.league.round || '';
-  var grpMatch = round.match(/Group\s+([A-L])/i) || round.match(/([A-L])/);
+  // Formato openfootball
+  var home  = f.home  || '?';
+  var away  = f.away  || '?';
+  var round = f.round || '';
+  var grpMatch = round.match(/Group\s+([A-L])/i) || round.match(/\b([A-L])\b/);
   var grp = grpMatch ? grpMatch[1].toUpperCase() : '?';
+  // Extrair número da rodada
   var rNum = 1;
-  if (round.match(/- 2/)) rNum = 2;
-  if (round.match(/- 3/)) rNum = 3;
+  if (round.match(/2/)) rNum = 2;
+  if (round.match(/3/)) rNum = 3;
   return {
-    r: rNum,
-    group: grp,
-    home: home,
-    away: away,
-    hs: f.goals.home,
-    as: f.goals.away,
-    status: si.type,
-    date: dateStr,
-    time: hm,
-    venue: f.fixture.venue ? (f.fixture.venue.name || '') : '',
-    city:  f.fixture.venue ? (f.fixture.venue.city || '') : '',
-    _liveLabel: si.label,
+    r:      rNum,
+    group:  grp,
+    home:   home,
+    away:   away,
+    hs:     f.homeScore,
+    as:     f.awayScore,
+    status: f.status || 'scheduled',
+    date:   f.date || '',
+    time:   f.time || '',
+    venue:  f.venue || '',
+    city:   f.city  || '',
   };
 }
 
-function parseStandings(standingsResp) {
+function parseStandings(standingsObj) {
+  // openfootball já retorna objeto {A:[...], B:[...]}
+  if (!standingsObj || typeof standingsObj !== 'object') return {};
+  // Garantir que cada time tem propriedades esperadas pelo renderGroups
   var result = {};
-  if (!standingsResp || !standingsResp.length) return result;
-  var allGroups = standingsResp[0].league.standings || [];
-  allGroups.forEach(function(groupArr) {
-    if (!groupArr.length) return;
-    var letter = (groupArr[0].group || '').replace(/Group\s+/i,'').replace(/Grupo\s+/i,'').trim();
-    result[letter] = groupArr.map(function(t) {
-      var code = getCode(t.team.name);
+  Object.keys(standingsObj).forEach(function(grp) {
+    result[grp] = standingsObj[grp].map(function(t) {
       return {
-        team: TEAM_NAMES[code] || t.team.name,
-        abbr: code,
-        w: t.all.win,
-        d: t.all.draw,
-        l: t.all.lose,
-        pts: t.points,
-        gp: t.all.goals ? t.all.goals.for : 0,
-        gc: t.all.goals ? t.all.goals.against : 0,
+        team: TEAM_NAMES[t.abbr] || t.team || t.abbr,
+        abbr: t.abbr,
+        w:    t.w   || 0,
+        d:    t.d   || 0,
+        l:    t.l   || 0,
+        pts:  t.pts || 0,
+        gp:   t.gp  || 0,
+        gc:   t.gc  || 0,
       };
     });
   });
   return result;
 }
 
-function parseScorers(scorersResp) {
-  if (!scorersResp || !scorersResp.length) return [];
-  return scorersResp.slice(0,15).map(function(item, i) {
-    var p    = item.player;
-    var stat = item.statistics && item.statistics[0] ? item.statistics[0] : {};
-    var code = stat.team ? getCode(stat.team.name) : '???';
+function parseScorers(scorersArr) {
+  if (!scorersArr || !scorersArr.length) return [];
+  return scorersArr.slice(0,15).map(function(s, i) {
     return {
       id:      'api_' + i,
-      name:    p.name || '—',
-      team:    TEAM_NAMES[code] || (stat.team ? stat.team.name : ''),
-      abbr:    code,
-      goals:   stat.goals ? (stat.goals.total || 0) : 0,
-      assists: stat.goals ? (stat.goals.assists || 0) : 0,
-      shots:   stat.shots ? (stat.shots.total || 0) : 0,
-      minutes: stat.games ? (stat.games.minutes || 0) : 0,
-      bio:     (p.nationality || '') + (p.age ? ', ' + p.age + ' anos' : ''),
+      name:    s.name  || '—',
+      team:    TEAM_NAMES[s.abbr] || s.team || s.abbr || '?',
+      abbr:    s.abbr  || '?',
+      goals:   s.goals   || 0,
+      assists: s.assists || 0,
+      shots:   0,
+      minutes: 0,
+      bio:     '',
       games:   [],
     };
   });
 }
+
 
 async function loadData(manual) {
   if (manual) {
