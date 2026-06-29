@@ -114,15 +114,16 @@ function calcStandings(fixtures) {
     var grp = f.group;
     if (!groups[grp]) groups[grp] = {};
     [
-      {code:f.home, name:f.homeName, gf:f.hs, gc:f.as},
-      {code:f.away, name:f.awayName, gf:f.as, gc:f.hs},
+      {abbr:f.home, name:f.homeName, gf:f.hs, gc:f.as},
+      {abbr:f.away, name:f.awayName, gf:f.as, gc:f.hs},
     ].forEach(function(t) {
-      if (!groups[grp][t.code]) {
-        groups[grp][t.code] = {team:t.name||t.code, abbr:t.code, w:0,d:0,l:0,pts:0,gp:0,gc:0};
+      if (!groups[grp][t.abbr]) {
+        groups[grp][t.abbr] = {team:t.name||t.abbr, abbr:t.abbr, w:0,d:0,l:0,pts:0,gf:0,gc:0,gp:0};
       }
-      var s = groups[grp][t.code];
-      s.gp += t.gf;
-      s.gc += t.gc;
+      var s = groups[grp][t.abbr];
+      s.gf += t.gf;   // gols pró
+      s.gc += t.gc;   // gols contra
+      s.gp  = s.gf;   // alias para compatibilidade com o front-end (usa .gp como gols pró)
       if      (t.gf > t.gc)  { s.w++; s.pts += 3; }
       else if (t.gf === t.gc) { s.d++; s.pts += 1; }
       else                    { s.l++; }
@@ -132,7 +133,7 @@ function calcStandings(fixtures) {
   Object.keys(groups).sort().forEach(function(grp) {
     result[grp] = Object.values(groups[grp]).sort(function(a,b) {
       if (b.pts !== a.pts) return b.pts - a.pts;
-      return (b.gp-b.gc) - (a.gp-a.gc) || b.gp - a.gp;
+      return (b.gf-b.gc) - (a.gf-a.gc) || b.gf - a.gf;
     });
   });
   return result;
