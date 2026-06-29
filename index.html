@@ -1539,7 +1539,7 @@ footer {
 
   <footer>
     Dados da fase de grupos da Copa do Mundo 2026 conforme Sportradar / FIFA.<br>
-    Jogos ate 24 jun 2026 (hora de Brasilia). Chaveamento dos dezesseis-avos baseado na classificacao atual.
+    Jogos ate 27 jun 2026 (hora de Brasilia). Confrontos dos dezesseis-avos conforme chaveamento oficial da FIFA.
   </footer>
 </div>
 
@@ -1588,6 +1588,7 @@ function getCode(name) { return CODE_MAP[name] || name.substring(0,3).toUpperCas
 // (os mesmos que estavam hardcoded antes)
 var GAMES = [];
 var STANDINGS = {
+  // Classificação final oficial da fase de grupos — Copa do Mundo 2026
   A:[{team:'México',abbr:'MEX',w:3,d:0,l:0,pts:9,gp:6,gc:0},{team:'África do Sul',abbr:'RSA',w:1,d:1,l:1,pts:4,gp:2,gc:3},{team:'Coreia do Sul',abbr:'KOR',w:1,d:0,l:2,pts:3,gp:2,gc:3},{team:'Tchéquia',abbr:'CZE',w:0,d:1,l:2,pts:1,gp:2,gc:6}],
   B:[{team:'Suíça',abbr:'SUI',w:2,d:1,l:0,pts:7,gp:7,gc:3},{team:'Canadá',abbr:'CAN',w:1,d:1,l:1,pts:4,gp:8,gc:3},{team:'Bósnia',abbr:'BIH',w:1,d:1,l:1,pts:4,gp:5,gc:6},{team:'Catar',abbr:'QAT',w:0,d:1,l:2,pts:1,gp:2,gc:10}],
   C:[{team:'Brasil',abbr:'BRA',w:2,d:1,l:0,pts:7,gp:7,gc:1},{team:'Marrocos',abbr:'MAR',w:2,d:1,l:0,pts:7,gp:6,gc:3},{team:'Escócia',abbr:'SCO',w:1,d:0,l:2,pts:3,gp:1,gc:4},{team:'Haiti',abbr:'HTI',w:0,d:0,l:3,pts:0,gp:2,gc:8}],
@@ -1641,24 +1642,30 @@ var STARS = {
   ],
 };
 
-// CHAVEAMENTO — estrutura fixa, times resolvidos dinamicamente via getStandingTeam()
+// CHAVEAMENTO — confrontos reais dos dezesseis-avos da Copa do Mundo 2026
 var BRACKET_STRUCTURE = [
-  {matchup:'Dezesseis-avos 1', date:'29 jun',venue:'MetLife Stadium',        city:'Nova York/NJ, EUA',    g1:'A',p1:1, g2:'B',p2:2},
-  {matchup:'Dezesseis-avos 2', date:'29 jun',venue:'Hard Rock Stadium',      city:'Miami, EUA',           g1:'B',p1:1, g2:'A',p2:2},
-  {matchup:'Dezesseis-avos 3', date:'30 jun',venue:'Mercedes-Benz Stadium',  city:'Atlanta, EUA',         g1:'C',p1:1, g2:'D',p2:2},
-  {matchup:'Dezesseis-avos 4', date:'30 jun',venue:'AT&T Stadium',           city:'Dallas, EUA',          g1:'D',p1:1, g2:'C',p2:2},
-  {matchup:'Dezesseis-avos 5', date:'01 jul',venue:'SoFi Stadium',           city:'Los Angeles, EUA',     g1:'E',p1:1, g2:'F',p2:2},
-  {matchup:'Dezesseis-avos 6', date:'01 jul',venue:'Arrowhead Stadium',      city:'Kansas City, EUA',     g1:'F',p1:1, g2:'E',p2:2},
-  {matchup:'Dezesseis-avos 7', date:'02 jul',venue:'Levis Stadium',          city:'Sao Francisco, EUA',   g1:'G',p1:1, g2:'H',p2:2},
-  {matchup:'Dezesseis-avos 8', date:'02 jul',venue:'BC Place',               city:'Vancouver, CAN',       g1:'H',p1:1, g2:'G',p2:2},
-  {matchup:'Dezesseis-avos 9', date:'03 jul',venue:'Rose Bowl',              city:'Los Angeles, EUA',     g1:'I',p1:1, g2:'J',p2:2},
-  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',          city:'Guadalajara, MEX',     g1:'J',p1:1, g2:'I',p2:2},
-  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',            city:'Houston, EUA',         g1:'K',p1:1, g2:'L',p2:2},
-  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',            city:'Seattle, EUA',         g1:'L',p1:1, g2:'K',p2:2},
-  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',       city:'Boston, EUA',          g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
-  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',           city:'Monterrey, MEX',       g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
-  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',      g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C/D)', label2:'Melhor 3o (E/F/G/H)'},
-  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',         city:'Cidade do México, MEX',g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (I/J/K/L)', label2:'A definir'},
+  // 28 jun — Los Angeles (SoFi Stadium)
+  {matchup:'Dezesseis-avos 1',  date:'28 jun',venue:'SoFi Stadium',              city:'Los Angeles, EUA',       team1fix:'África do Sul', abbr1fix:'RSA', team2fix:'Canadá',              abbr2fix:'CAN'},
+  // 29 jun
+  {matchup:'Dezesseis-avos 2',  date:'29 jun',venue:'NRG Stadium',               city:'Houston, EUA',           team1fix:'Brasil',        abbr1fix:'BRA', team2fix:'Japão',               abbr2fix:'JPN'},
+  {matchup:'Dezesseis-avos 3',  date:'29 jun',venue:'Gillette Stadium',          city:'Boston, EUA',            team1fix:'Alemanha',      abbr1fix:'GER', team2fix:'Paraguai',            abbr2fix:'PAR'},
+  {matchup:'Dezesseis-avos 4',  date:'29 jun',venue:'Estadio BBVA',              city:'Monterrey, MEX',         team1fix:'Holanda',       abbr1fix:'NED', team2fix:'Marrocos',            abbr2fix:'MAR'},
+  // 30 jun
+  {matchup:'Dezesseis-avos 5',  date:'30 jun',venue:'AT&T Stadium',              city:'Dallas, EUA',            team1fix:'C. Marfim',     abbr1fix:'CIV', team2fix:'Noruega',             abbr2fix:'NOR'},
+  {matchup:'Dezesseis-avos 6',  date:'30 jun',venue:'MetLife Stadium',           city:'Nova York/NJ, EUA',      team1fix:'França',        abbr1fix:'FRA', team2fix:'Suécia',              abbr2fix:'SWE'},
+  {matchup:'Dezesseis-avos 7',  date:'30 jun',venue:'Estadio Azteca',            city:'Cidade do México, MEX',  team1fix:'México',        abbr1fix:'MEX', team2fix:'Equador',             abbr2fix:'ECU'},
+  // 1 jul
+  {matchup:'Dezesseis-avos 8',  date:'01 jul',venue:'Mercedes-Benz Stadium',     city:'Atlanta, EUA',           team1fix:'Inglaterra',    abbr1fix:'ENG', team2fix:'Congo (RD)',          abbr2fix:'COD'},
+  {matchup:'Dezesseis-avos 9',  date:'01 jul',venue:'Lumen Field',               city:'Seattle, EUA',           team1fix:'Bélgica',       abbr1fix:'BEL', team2fix:'Senegal',             abbr2fix:'SEN'},
+  {matchup:'Dezesseis-avos 10', date:'01 jul',venue:'Levis Stadium',             city:'São Francisco, EUA',     team1fix:'Estados Unidos',abbr1fix:'USA', team2fix:'Bósnia',              abbr2fix:'BIH'},
+  // 2 jul
+  {matchup:'Dezesseis-avos 11', date:'02 jul',venue:'SoFi Stadium',              city:'Los Angeles, EUA',       team1fix:'Espanha',       abbr1fix:'ESP', team2fix:'Áustria',             abbr2fix:'AUT'},
+  {matchup:'Dezesseis-avos 12', date:'02 jul',venue:'BC Place',                  city:'Toronto, CAN',           team1fix:'Portugal',      abbr1fix:'POR', team2fix:'Croácia',             abbr2fix:'CRO'},
+  {matchup:'Dezesseis-avos 13', date:'02 jul',venue:'BC Place',                  city:'Vancouver, CAN',         team1fix:'Suíça',         abbr1fix:'SUI', team2fix:'Argélia',             abbr2fix:'DZA'},
+  // 3 jul
+  {matchup:'Dezesseis-avos 14', date:'03 jul',venue:'AT&T Stadium',              city:'Dallas, EUA',            team1fix:'Austrália',     abbr1fix:'AUS', team2fix:'Egito',               abbr2fix:'EGY'},
+  {matchup:'Dezesseis-avos 15', date:'03 jul',venue:'Hard Rock Stadium',         city:'Miami, EUA',             team1fix:'Argentina',     abbr1fix:'ARG', team2fix:'Cabo Verde',          abbr2fix:'CPV'},
+  {matchup:'Dezesseis-avos 16', date:'03 jul',venue:'Arrowhead Stadium',         city:'Kansas City, EUA',       team1fix:'Colômbia',      abbr1fix:'COL', team2fix:'Gana',                abbr2fix:'GHA'},
 ];
 
 // Retorna nome do time na posição p (1=1o, 2=2o) do grupo g, usando STANDINGS atual
@@ -1672,10 +1679,11 @@ function getStandingTeam(g, p) {
 
 function buildBracket() {
   return BRACKET_STRUCTURE.map(function(b) {
-    var team1 = b.g1 === '?' ? '?' : getStandingTeam(b.g1, b.p1);
-    var team2 = b.g2 === '?' ? '?' : getStandingTeam(b.g2, b.p2);
-    var seed1 = b.label1 || (b.p1 + 'o Grupo ' + b.g1);
-    var seed2 = b.label2 || (b.p2 + 'o Grupo ' + b.g2);
+    // Confrontos fixos: times já definidos diretamente no BRACKET_STRUCTURE
+    var team1 = b.team1fix || (b.g1 === '?' ? '?' : getStandingTeam(b.g1, b.p1));
+    var team2 = b.team2fix || (b.g2 === '?' ? '?' : getStandingTeam(b.g2, b.p2));
+    var seed1 = b.label1 || (b.p1 ? (b.p1 + 'o Grupo ' + b.g1) : team1);
+    var seed2 = b.label2 || (b.p2 ? (b.p2 + 'o Grupo ' + b.g2) : team2);
     var note  = (team1 === 'A definir' || team2 === 'A definir') ? 'Aguardando encerramento dos grupos' : '';
     return { matchup:b.matchup, date:b.date, venue:b.venue, city:b.city,
              seed1:seed1, team1:team1, seed2:seed2, team2:team2, note:note };
