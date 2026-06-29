@@ -497,6 +497,9 @@ body {
 .bm-goals-right { text-align:right; }
 .bm-finished-label { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; background:rgba(212,175,55,.15); color:var(--gold); border-radius:4px; padding:2px 6px; margin-right:4px; }
 .bracket-card-finished { border-left:2px solid var(--gold); }
+.bm-live-label { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; background:rgba(220,50,50,.2); color:#ff5555; border-radius:4px; padding:2px 6px; margin-right:4px; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.bracket-card-live { border-left:2px solid #ff5555; }
 .bracket-card {
   background: var(--bg-2);
   border: 1px solid var(--line);
@@ -1930,15 +1933,16 @@ function renderBracket() {
       var t1p = b.team1 === 'A definir' || b.team1 === '?';
       var t2p = b.team2 === 'A definir' || b.team2 === '?';
       var isFinished = b.finished === true;
-      var scoreHtml = isFinished
+      var scoreHtml = (isFinished || isLive)
         ? '<span class="bm-score' + (b.winner===1 ? ' bm-winner-left' : '') + '">' + b.score1 + '</span>' +
           '<span class="bm-score-sep">×</span>' +
           '<span class="bm-score' + (b.winner===2 ? ' bm-winner-right' : '') + '">' + b.score2 + '</span>'
         : '<span class="bm-score-vs">vs</span>';
       var goals1Html = (isFinished && b.goals1 && b.goals1.length) ? '<div class="bm-goals bm-goals-left">⚽ ' + b.goals1.join(' · ') + '</div>' : '';
       var goals2Html = (isFinished && b.goals2 && b.goals2.length) ? '<div class="bm-goals bm-goals-right">⚽ ' + b.goals2.join(' · ') + '</div>' : '';
-      var encLabel = isFinished ? '<span class="bm-finished-label">Encerrado</span>' : '';
-      return '<div class="bracket-card' + (isFinished ? ' bracket-card-finished' : '') + '">' +
+      var isLive = b.inPlay === true;
+      var encLabel = isFinished ? '<span class="bm-finished-label">Encerrado</span>' : (isLive ? '<span class="bm-live-label">🔴 Ao vivo</span>' : '');
+      return '<div class="bracket-card' + (isFinished ? ' bracket-card-finished' : isLive ? ' bracket-card-live' : '') + '">' +
         '<div class="bracket-card-head"><span class="bracket-card-title">' + b.matchup + '</span>' + encLabel + '<span class="bracket-card-date">' + b.date + '</span></div>' +
         '<div class="bracket-matchup">' +
           '<div class="bm-row bm-row-score">' +
@@ -2454,6 +2458,46 @@ function loadData(force) {
       if (payload.fixtures && payload.fixtures.length > 0) {
         GAMES = payload.fixtures;
         API_GAMES = payload.fixtures;
+
+        // Atualiza placares/goleadores dos dezesseis-avos automaticamente
+        var knockoutStages = ['ROUND_OF_32','LAST_32','ROUND_16'];
+        var knockoutMatches = payload.fixtures.filter(function(f) {
+          return knockoutStages.indexOf(f.stage) >= 0;
+        });
+        if (knockoutMatches.length > 0) {
+          BRACKET_STRUCTURE.forEach(function(b, idx) {
+            // Procura o jogo correspondente pelo par de times
+            var match = knockoutMatches.find(function(m) {
+              return (m.homeAbbr === b.abbr1fix && m.awayAbbr === b.abbr2fix) ||
+                     (m.homeAbbr === b.abbr2fix && m.awayAbbr === b.abbr1fix);
+            });
+            if (!match) return;
+            var isHome1 = match.homeAbbr === b.abbr1fix;
+            var sc1 = isHome1 ? match.hs : match.as;
+            var sc2 = isHome1 ? match.as : match.hs;
+            if (match.status === 'FINISHED' && sc1 !== null && sc2 !== null) {
+              b.score1 = sc1;
+              b.score2 = sc2;
+              b.finished = true;
+              b.winner = sc1 > sc2 ? 1 : sc1 < sc2 ? 2 : 0;
+              // Goleadores
+              var g1 = [], g2 = [];
+              (match.goals || []).forEach(function(g) {
+                var entry = g.player + ' ' + g.minute + "'";
+                if (g.type === 'OWN') entry += ' (contra)';
+                if (isHome1 ? g.team === b.abbr1fix : g.team === b.abbr2fix) g1.push(entry);
+                else g2.push(entry);
+              });
+              if (g1.length) b.goals1 = g1;
+              if (g2.length) b.goals2 = g2;
+            } else if (match.status === 'IN_PLAY' || match.status === 'PAUSED') {
+              b.score1 = sc1 || 0;
+              b.score2 = sc2 || 0;
+              b.inPlay = true;
+              b.finished = false;
+            }
+          });
+        }
       }
 
       // Atualiza standings → STANDINGS
