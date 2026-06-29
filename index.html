@@ -1588,18 +1588,18 @@ function getCode(name) { return CODE_MAP[name] || name.substring(0,3).toUpperCas
 // (os mesmos que estavam hardcoded antes)
 var GAMES = [];
 var STANDINGS = {
-  A:[{team:'México',abbr:'MEX',w:3,d:0,l:0,pts:9,gp:6,gc:0},{team:'África do Sul',abbr:'RSA',w:1,d:1,l:1,pts:4,gp:2,gc:3},{team:'Coreia do Sul',abbr:'KOR',w:1,d:0,l:2,pts:3,gp:4,gc:4},{team:'Tchéquia',abbr:'CZE',w:0,d:1,l:2,pts:1,gp:2,gc:7}],
-  B:[{team:'Suíça',abbr:'SUI',w:2,d:1,l:0,pts:7,gp:7,gc:3},{team:'Bósnia',abbr:'BIH',w:1,d:1,l:1,pts:4,gp:5,gc:6},{team:'Canadá',abbr:'CAN',w:1,d:1,l:1,pts:4,gp:8,gc:7},{team:'Catar',abbr:'QAT',w:0,d:1,l:2,pts:1,gp:2,gc:6}],
-  C:[{team:'Brasil',abbr:'BRA',w:2,d:1,l:0,pts:7,gp:7,gc:1},{team:'Marrocos',abbr:'MAR',w:2,d:1,l:0,pts:7,gp:6,gc:3},{team:'Escócia',abbr:'SCO',w:1,d:0,l:2,pts:3,gp:2,gc:4},{team:'Haiti',abbr:'HTI',w:0,d:0,l:3,pts:0,gp:2,gc:9}],
-  D:[{team:'Estados Unidos',abbr:'USA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Austrália',abbr:'AUS',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Paraguai',abbr:'PAR',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Turquia',abbr:'TUR',w:0,d:0,l:2,pts:0,gp:0,gc:3}],
-  E:[{team:'Alemanha',abbr:'GER',w:2,d:0,l:0,pts:6,gp:9,gc:2},{team:'C. Marfim',abbr:'CIV',w:1,d:0,l:1,pts:3,gp:2,gc:2},{team:'Equador',abbr:'ECU',w:0,d:1,l:1,pts:1,gp:0,gc:1},{team:'Curaçao',abbr:'CUW',w:0,d:1,l:1,pts:1,gp:1,gc:7}],
-  F:[{team:'Holanda',abbr:'NED',w:1,d:1,l:0,pts:4,gp:7,gc:3},{team:'Japão',abbr:'JPN',w:1,d:1,l:0,pts:4,gp:6,gc:2},{team:'Suécia',abbr:'SWE',w:1,d:0,l:1,pts:3,gp:6,gc:6},{team:'Tunísia',abbr:'TUN',w:0,d:0,l:2,pts:0,gp:1,gc:9}],
-  G:[{team:'Egito',abbr:'EGY',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Irã',abbr:'IRN',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Bélgica',abbr:'BEL',w:0,d:2,l:0,pts:2,gp:1,gc:1},{team:'Nova Zelândia',abbr:'NZL',w:0,d:1,l:1,pts:1,gp:3,gc:5}],
-  H:[{team:'Espanha',abbr:'ESP',w:1,d:1,l:0,pts:4,gp:4,gc:0},{team:'Uruguai',abbr:'URU',w:0,d:2,l:0,pts:2,gp:3,gc:3},{team:'Cabo Verde',abbr:'CPV',w:0,d:2,l:0,pts:2,gp:2,gc:2},{team:'Ar. Saudita',abbr:'KSA',w:0,d:1,l:1,pts:1,gp:1,gc:5}],
-  I:[{team:'França',abbr:'FRA',w:2,d:0,l:0,pts:6,gp:6,gc:1},{team:'Noruega',abbr:'NOR',w:2,d:0,l:0,pts:6,gp:7,gc:3},{team:'Senegal',abbr:'SEN',w:0,d:0,l:2,pts:0,gp:3,gc:6},{team:'Iraque',abbr:'IRQ',w:0,d:0,l:2,pts:0,gp:1,gc:7}],
-  J:[{team:'Argentina',abbr:'ARG',w:2,d:0,l:0,pts:6,gp:5,gc:0},{team:'Áustria',abbr:'AUT',w:1,d:0,l:1,pts:3,gp:3,gc:3},{team:'Argélia',abbr:'DZA',w:1,d:0,l:1,pts:3,gp:2,gc:4},{team:'Jordânia',abbr:'JOR',w:0,d:0,l:2,pts:0,gp:2,gc:5}],
-  K:[{team:'Colômbia',abbr:'COL',w:2,d:0,l:0,pts:6,gp:4,gc:1},{team:'Portugal',abbr:'POR',w:1,d:1,l:0,pts:4,gp:6,gc:1},{team:'Congo (RD)',abbr:'COD',w:0,d:1,l:1,pts:1,gp:1,gc:1},{team:'Uzbequistão',abbr:'UZB',w:0,d:0,l:2,pts:0,gp:1,gc:8}],
-  L:[{team:'Inglaterra',abbr:'ENG',w:1,d:1,l:0,pts:4,gp:4,gc:2},{team:'Gana',abbr:'GHA',w:1,d:1,l:0,pts:4,gp:1,gc:0},{team:'Croácia',abbr:'CRO',w:1,d:0,l:1,pts:3,gp:3,gc:4},{team:'Panamá',abbr:'PAN',w:0,d:0,l:2,pts:0,gp:0,gc:2}],
+  A:[{team:'México',abbr:'MEX',w:3,d:0,l:0,pts:9,gp:6,gc:0},{team:'África do Sul',abbr:'RSA',w:1,d:1,l:1,pts:4,gp:2,gc:3},{team:'Coreia do Sul',abbr:'KOR',w:1,d:0,l:2,pts:3,gp:2,gc:3},{team:'Tchéquia',abbr:'CZE',w:0,d:1,l:2,pts:1,gp:2,gc:6}],
+  B:[{team:'Suíça',abbr:'SUI',w:2,d:1,l:0,pts:7,gp:7,gc:3},{team:'Canadá',abbr:'CAN',w:1,d:1,l:1,pts:4,gp:8,gc:3},{team:'Bósnia',abbr:'BIH',w:1,d:1,l:1,pts:4,gp:5,gc:6},{team:'Catar',abbr:'QAT',w:0,d:1,l:2,pts:1,gp:2,gc:10}],
+  C:[{team:'Brasil',abbr:'BRA',w:2,d:1,l:0,pts:7,gp:7,gc:1},{team:'Marrocos',abbr:'MAR',w:2,d:1,l:0,pts:7,gp:6,gc:3},{team:'Escócia',abbr:'SCO',w:1,d:0,l:2,pts:3,gp:1,gc:4},{team:'Haiti',abbr:'HTI',w:0,d:0,l:3,pts:0,gp:2,gc:8}],
+  D:[{team:'Estados Unidos',abbr:'USA',w:2,d:0,l:1,pts:6,gp:8,gc:4},{team:'Austrália',abbr:'AUS',w:1,d:1,l:1,pts:4,gp:2,gc:2},{team:'Paraguai',abbr:'PAR',w:1,d:1,l:1,pts:4,gp:2,gc:4},{team:'Turquia',abbr:'TUR',w:1,d:0,l:2,pts:3,gp:3,gc:5}],
+  E:[{team:'Alemanha',abbr:'GER',w:2,d:0,l:1,pts:6,gp:10,gc:4},{team:'C. Marfim',abbr:'CIV',w:2,d:0,l:1,pts:6,gp:4,gc:2},{team:'Equador',abbr:'ECU',w:1,d:1,l:1,pts:4,gp:2,gc:2},{team:'Curaçao',abbr:'CUW',w:0,d:1,l:2,pts:1,gp:1,gc:9}],
+  F:[{team:'Holanda',abbr:'NED',w:2,d:1,l:0,pts:7,gp:10,gc:4},{team:'Japão',abbr:'JPN',w:1,d:2,l:0,pts:5,gp:7,gc:3},{team:'Suécia',abbr:'SWE',w:1,d:1,l:1,pts:4,gp:7,gc:7},{team:'Tunísia',abbr:'TUN',w:0,d:0,l:3,pts:0,gp:2,gc:12}],
+  G:[{team:'Bélgica',abbr:'BEL',w:1,d:2,l:0,pts:5,gp:6,gc:2},{team:'Egito',abbr:'EGY',w:1,d:2,l:0,pts:5,gp:5,gc:3},{team:'Irã',abbr:'IRN',w:0,d:3,l:0,pts:3,gp:3,gc:3},{team:'Nova Zelândia',abbr:'NZL',w:0,d:1,l:2,pts:1,gp:4,gc:10}],
+  H:[{team:'Espanha',abbr:'ESP',w:2,d:1,l:0,pts:7,gp:5,gc:0},{team:'Cabo Verde',abbr:'CPV',w:0,d:3,l:0,pts:3,gp:2,gc:2},{team:'Uruguai',abbr:'URU',w:0,d:2,l:1,pts:2,gp:3,gc:4},{team:'Ar. Saudita',abbr:'KSA',w:0,d:2,l:1,pts:2,gp:1,gc:5}],
+  I:[{team:'França',abbr:'FRA',w:3,d:0,l:0,pts:9,gp:10,gc:2},{team:'Noruega',abbr:'NOR',w:2,d:0,l:1,pts:6,gp:8,gc:7},{team:'Senegal',abbr:'SEN',w:1,d:0,l:2,pts:3,gp:8,gc:6},{team:'Iraque',abbr:'IRQ',w:0,d:0,l:3,pts:0,gp:1,gc:12}],
+  J:[{team:'Argentina',abbr:'ARG',w:3,d:0,l:0,pts:9,gp:8,gc:1},{team:'Áustria',abbr:'AUT',w:1,d:1,l:1,pts:4,gp:6,gc:6},{team:'Argélia',abbr:'DZA',w:1,d:1,l:1,pts:4,gp:5,gc:7},{team:'Jordânia',abbr:'JOR',w:0,d:0,l:3,pts:0,gp:3,gc:8}],
+  K:[{team:'Colômbia',abbr:'COL',w:2,d:1,l:0,pts:7,gp:4,gc:1},{team:'Portugal',abbr:'POR',w:1,d:2,l:0,pts:5,gp:6,gc:1},{team:'Congo (RD)',abbr:'COD',w:1,d:1,l:1,pts:4,gp:4,gc:3},{team:'Uzbequistão',abbr:'UZB',w:0,d:0,l:3,pts:0,gp:2,gc:11}],
+  L:[{team:'Inglaterra',abbr:'ENG',w:2,d:1,l:0,pts:7,gp:6,gc:2},{team:'Croácia',abbr:'CRO',w:2,d:0,l:1,pts:6,gp:5,gc:5},{team:'Gana',abbr:'GHA',w:1,d:1,l:1,pts:4,gp:2,gc:2},{team:'Panamá',abbr:'PAN',w:0,d:0,l:3,pts:0,gp:0,gc:4}],
 };
 var SCORERS = [];
 
@@ -1643,22 +1643,22 @@ var STARS = {
 
 // CHAVEAMENTO — estrutura fixa, times resolvidos dinamicamente via getStandingTeam()
 var BRACKET_STRUCTURE = [
-  {matchup:'Dezesseis-avos 1', date:'29 jun',venue:'MetLife Stadium',      city:'Nova York/NJ, EUA',   g1:'A',p1:1, g2:'B',p2:2},
-  {matchup:'Dezesseis-avos 2', date:'29 jun',venue:'Hard Rock Stadium',    city:'Miami, EUA',          g1:'B',p1:1, g2:'A',p2:2},
-  {matchup:'Dezesseis-avos 3', date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',        g1:'C',p1:1, g2:'D',p2:2},
-  {matchup:'Dezesseis-avos 4', date:'30 jun',venue:'AT&T Stadium',         city:'Dallas, EUA',         g1:'D',p1:1, g2:'C',p2:2},
-  {matchup:'Dezesseis-avos 5', date:'01 jul',venue:'SoFi Stadium',         city:'Los Angeles, EUA',    g1:'E',p1:1, g2:'F',p2:2},
-  {matchup:'Dezesseis-avos 6', date:'01 jul',venue:'Arrowhead Stadium',    city:'Kansas City, EUA',    g1:'F',p1:1, g2:'E',p2:2},
-  {matchup:'Dezesseis-avos 7', date:'02 jul',venue:'Levis Stadium',        city:'Sao Francisco, EUA',  g1:'G',p1:1, g2:'H',p2:2},
-  {matchup:'Dezesseis-avos 8', date:'02 jul',venue:'BC Place',             city:'Vancouver, CAN',      g1:'H',p1:1, g2:'G',p2:2},
-  {matchup:'Dezesseis-avos 9', date:'03 jul',venue:'Rose Bowl',            city:'Los Angeles, EUA',    g1:'I',p1:1, g2:'J',p2:2},
-  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',        city:'Guadalajara, MEX',    g1:'J',p1:1, g2:'I',p2:2},
-  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',          city:'Houston, EUA',        g1:'K',p1:1, g2:'L',p2:2},
-  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',          city:'Seattle, EUA',        g1:'L',p1:1, g2:'K',p2:2},
-  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',     city:'Boston, EUA',         g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
-  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',         city:'Monterrey, MEX',      g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
-  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',   g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
-  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',       city:'Cidade do México, MEX',g1:'?',p1:0,g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
+  {matchup:'Dezesseis-avos 1', date:'29 jun',venue:'MetLife Stadium',        city:'Nova York/NJ, EUA',    g1:'A',p1:1, g2:'B',p2:2},
+  {matchup:'Dezesseis-avos 2', date:'29 jun',venue:'Hard Rock Stadium',      city:'Miami, EUA',           g1:'B',p1:1, g2:'A',p2:2},
+  {matchup:'Dezesseis-avos 3', date:'30 jun',venue:'Mercedes-Benz Stadium',  city:'Atlanta, EUA',         g1:'C',p1:1, g2:'D',p2:2},
+  {matchup:'Dezesseis-avos 4', date:'30 jun',venue:'AT&T Stadium',           city:'Dallas, EUA',          g1:'D',p1:1, g2:'C',p2:2},
+  {matchup:'Dezesseis-avos 5', date:'01 jul',venue:'SoFi Stadium',           city:'Los Angeles, EUA',     g1:'E',p1:1, g2:'F',p2:2},
+  {matchup:'Dezesseis-avos 6', date:'01 jul',venue:'Arrowhead Stadium',      city:'Kansas City, EUA',     g1:'F',p1:1, g2:'E',p2:2},
+  {matchup:'Dezesseis-avos 7', date:'02 jul',venue:'Levis Stadium',          city:'Sao Francisco, EUA',   g1:'G',p1:1, g2:'H',p2:2},
+  {matchup:'Dezesseis-avos 8', date:'02 jul',venue:'BC Place',               city:'Vancouver, CAN',       g1:'H',p1:1, g2:'G',p2:2},
+  {matchup:'Dezesseis-avos 9', date:'03 jul',venue:'Rose Bowl',              city:'Los Angeles, EUA',     g1:'I',p1:1, g2:'J',p2:2},
+  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',          city:'Guadalajara, MEX',     g1:'J',p1:1, g2:'I',p2:2},
+  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',            city:'Houston, EUA',         g1:'K',p1:1, g2:'L',p2:2},
+  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',            city:'Seattle, EUA',         g1:'L',p1:1, g2:'K',p2:2},
+  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',       city:'Boston, EUA',          g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
+  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',           city:'Monterrey, MEX',       g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
+  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',      g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C/D)', label2:'Melhor 3o (E/F/G/H)'},
+  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',         city:'Cidade do México, MEX',g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (I/J/K/L)', label2:'A definir'},
 ];
 
 // Retorna nome do time na posição p (1=1o, 2=2o) do grupo g, usando STANDINGS atual
