@@ -484,6 +484,19 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 10px;
 }
+.bm-row-score { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.bm-score-box { display:flex; align-items:center; gap:4px; margin:0 6px; }
+.bm-score { font-family:var(--font-head); font-size:22px; font-weight:900; color:var(--text-dim); min-width:20px; text-align:center; }
+.bm-score.bm-winner-left, .bm-score.bm-winner-right { color:var(--gold); }
+.bm-score-sep { color:var(--text-dim); font-size:14px; }
+.bm-score-vs { color:var(--text-dim); font-size:12px; padding:0 8px; }
+.bm-team-winner { color:var(--gold) !important; font-weight:800; }
+.bm-team-right { text-align:right; }
+.bm-goals-row { display:flex; justify-content:space-between; margin-top:4px; gap:6px; }
+.bm-goals { font-size:10px; color:var(--text-dim); line-height:1.4; flex:1; }
+.bm-goals-right { text-align:right; }
+.bm-finished-label { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; background:rgba(212,175,55,.15); color:var(--gold); border-radius:4px; padding:2px 6px; margin-right:4px; }
+.bracket-card-finished { border-left:2px solid var(--gold); }
 .bracket-card {
   background: var(--bg-2);
   border: 1px solid var(--line);
@@ -1645,9 +1658,10 @@ var STARS = {
 // CHAVEAMENTO — confrontos reais dos dezesseis-avos da Copa do Mundo 2026
 var BRACKET_STRUCTURE = [
   // 28 jun — Los Angeles (SoFi Stadium)
-  {matchup:'Dezesseis-avos 1',  date:'28 jun',venue:'SoFi Stadium',              city:'Los Angeles, EUA',       team1fix:'África do Sul', abbr1fix:'RSA', team2fix:'Canadá',              abbr2fix:'CAN'},
+  {matchup:'Dezesseis-avos 1',  date:'28 jun',venue:'SoFi Stadium',              city:'Los Angeles, EUA',       team1fix:'África do Sul', abbr1fix:'RSA', team2fix:'Canadá',              abbr2fix:'CAN', score1:0, score2:1, finished:true, winner:2, goals1:[], goals2:["Eustáquio 90'"]},
   // 29 jun
-  {matchup:'Dezesseis-avos 2',  date:'29 jun',venue:'NRG Stadium',               city:'Houston, EUA',           team1fix:'Brasil',        abbr1fix:'BRA', team2fix:'Japão',               abbr2fix:'JPN'},
+  // 29 jun
+  {matchup:'Dezesseis-avos 2',  date:'29 jun',venue:'NRG Stadium',               city:'Houston, EUA',           team1fix:'Brasil',        abbr1fix:'BRA', team2fix:'Japão',               abbr2fix:'JPN', score1:2, score2:1, finished:true, winner:1, goals1:["Casemiro 56'","Martinelli 90+2'"], goals2:["Sano 38'"]},
   {matchup:'Dezesseis-avos 3',  date:'29 jun',venue:'Gillette Stadium',          city:'Boston, EUA',            team1fix:'Alemanha',      abbr1fix:'GER', team2fix:'Paraguai',            abbr2fix:'PAR'},
   {matchup:'Dezesseis-avos 4',  date:'29 jun',venue:'Estadio BBVA',              city:'Monterrey, MEX',         team1fix:'Holanda',       abbr1fix:'NED', team2fix:'Marrocos',            abbr2fix:'MAR'},
   // 30 jun
@@ -1915,12 +1929,26 @@ function renderBracket() {
     bracket.map(function(b) {
       var t1p = b.team1 === 'A definir' || b.team1 === '?';
       var t2p = b.team2 === 'A definir' || b.team2 === '?';
-      return '<div class="bracket-card">' +
-        '<div class="bracket-card-head"><span class="bracket-card-title">' + b.matchup + '</span><span class="bracket-card-date">' + b.date + '</span></div>' +
+      var isFinished = b.finished === true;
+      var scoreHtml = isFinished
+        ? '<span class="bm-score' + (b.winner===1 ? ' bm-winner-left' : '') + '">' + b.score1 + '</span>' +
+          '<span class="bm-score-sep">×</span>' +
+          '<span class="bm-score' + (b.winner===2 ? ' bm-winner-right' : '') + '">' + b.score2 + '</span>'
+        : '<span class="bm-score-vs">vs</span>';
+      var goals1Html = (isFinished && b.goals1 && b.goals1.length) ? '<div class="bm-goals bm-goals-left">⚽ ' + b.goals1.join(' · ') + '</div>' : '';
+      var goals2Html = (isFinished && b.goals2 && b.goals2.length) ? '<div class="bm-goals bm-goals-right">⚽ ' + b.goals2.join(' · ') + '</div>' : '';
+      var encLabel = isFinished ? '<span class="bm-finished-label">Encerrado</span>' : '';
+      return '<div class="bracket-card' + (isFinished ? ' bracket-card-finished' : '') + '">' +
+        '<div class="bracket-card-head"><span class="bracket-card-title">' + b.matchup + '</span>' + encLabel + '<span class="bracket-card-date">' + b.date + '</span></div>' +
         '<div class="bracket-matchup">' +
-          '<div class="bm-row"><span class="bm-seed">' + b.seed1 + '</span><span class="bm-team' + (t1p ? ' bm-qualifier' : '') + '">' + b.team1 + '</span></div>' +
-          '<div class="bm-vs">vs</div>' +
-          '<div class="bm-row"><span class="bm-seed">' + b.seed2 + '</span><span class="bm-team' + (t2p ? ' bm-qualifier' : '') + '">' + b.team2 + '</span></div>' +
+          '<div class="bm-row bm-row-score">' +
+            '<span class="bm-seed">' + b.seed1 + '</span>' +
+            '<span class="bm-team' + (t1p ? ' bm-qualifier' : '') + (b.winner===1 ? ' bm-team-winner' : '') + '">' + b.team1 + '</span>' +
+            '<div class="bm-score-box">' + scoreHtml + '</div>' +
+            '<span class="bm-team bm-team-right' + (t2p ? ' bm-qualifier' : '') + (b.winner===2 ? ' bm-team-winner' : '') + '">' + b.team2 + '</span>' +
+            '<span class="bm-seed">' + b.seed2 + '</span>' +
+          '</div>' +
+          (goals1Html || goals2Html ? '<div class="bm-goals-row">' + goals1Html + goals2Html + '</div>' : '') +
         '</div>' +
         '<div class="bm-venue">&#128205; <strong>' + b.venue + '</strong> &middot; ' + b.city + (b.note ? ' &middot; <em>' + b.note + '</em>' : '') + '</div>' +
         '</div>';
