@@ -1641,25 +1641,46 @@ var STARS = {
   ],
 };
 
-// CHAVEAMENTO
-var BRACKET = [
-  {matchup:'Dezesseis-avos 1',date:'29 jun',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',seed1:'1o Grupo A',team1:'México',seed2:'2o Grupo B',team2:'Bósnia',note:''},
-  {matchup:'Dezesseis-avos 2',date:'29 jun',venue:'Hard Rock Stadium',city:'Miami, EUA',seed1:'1o Grupo B',team1:'Suica',seed2:'2o Grupo A',team2:'Africa do Sul',note:''},
-  {matchup:'Dezesseis-avos 3',date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',seed1:'1o Grupo C',team1:'Brasil',seed2:'2o Grupo D',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 4',date:'30 jun',venue:'AT&T Stadium',city:'Dallas, EUA',seed1:'1o Grupo D',team1:'A definir',seed2:'2o Grupo C',team2:'Marrocos',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 5',date:'01 jul',venue:'SoFi Stadium',city:'Los Angeles, EUA',seed1:'1o Grupo E',team1:'A definir',seed2:'2o Grupo F',team2:'A definir',note:'Aguardando Rodadas 3'},
-  {matchup:'Dezesseis-avos 6',date:'01 jul',venue:'Arrowhead Stadium',city:'Kansas City, EUA',seed1:'1o Grupo F',team1:'A definir',seed2:'2o Grupo E',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 7',date:'02 jul',venue:'Levis Stadium',city:'Sao Francisco, EUA',seed1:'1o Grupo G',team1:'A definir',seed2:'2o Grupo H',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 8',date:'02 jul',venue:'BC Place',city:'Vancouver, CAN',seed1:'1o Grupo H',team1:'A definir',seed2:'2o Grupo G',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 9',date:'03 jul',venue:'Rose Bowl',city:'Los Angeles, EUA',seed1:'1o Grupo I',team1:'A definir',seed2:'2o Grupo J',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',city:'Guadalajara, MEX',seed1:'1o Grupo J',team1:'Argentina',seed2:'2o Grupo I',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',city:'Houston, EUA',seed1:'1o Grupo K',team1:'A definir',seed2:'2o Grupo L',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',city:'Seattle, EUA',seed1:'1o Grupo L',team1:'A definir',seed2:'2o Grupo K',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',city:'Boston, EUA',seed1:'Melhor 3o (A/B/C)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',city:'Monterrey, MEX',seed1:'Melhor 3o (D/E/F)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',seed1:'Melhor 3o (G/H/I)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',city:'Cidade do México, MEX',seed1:'Melhor 3o (J/K/L)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+// CHAVEAMENTO — estrutura fixa, times resolvidos dinamicamente via getStandingTeam()
+var BRACKET_STRUCTURE = [
+  {matchup:'Dezesseis-avos 1', date:'29 jun',venue:'MetLife Stadium',      city:'Nova York/NJ, EUA',   g1:'A',p1:1, g2:'B',p2:2},
+  {matchup:'Dezesseis-avos 2', date:'29 jun',venue:'Hard Rock Stadium',    city:'Miami, EUA',          g1:'B',p1:1, g2:'A',p2:2},
+  {matchup:'Dezesseis-avos 3', date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',        g1:'C',p1:1, g2:'D',p2:2},
+  {matchup:'Dezesseis-avos 4', date:'30 jun',venue:'AT&T Stadium',         city:'Dallas, EUA',         g1:'D',p1:1, g2:'C',p2:2},
+  {matchup:'Dezesseis-avos 5', date:'01 jul',venue:'SoFi Stadium',         city:'Los Angeles, EUA',    g1:'E',p1:1, g2:'F',p2:2},
+  {matchup:'Dezesseis-avos 6', date:'01 jul',venue:'Arrowhead Stadium',    city:'Kansas City, EUA',    g1:'F',p1:1, g2:'E',p2:2},
+  {matchup:'Dezesseis-avos 7', date:'02 jul',venue:'Levis Stadium',        city:'Sao Francisco, EUA',  g1:'G',p1:1, g2:'H',p2:2},
+  {matchup:'Dezesseis-avos 8', date:'02 jul',venue:'BC Place',             city:'Vancouver, CAN',      g1:'H',p1:1, g2:'G',p2:2},
+  {matchup:'Dezesseis-avos 9', date:'03 jul',venue:'Rose Bowl',            city:'Los Angeles, EUA',    g1:'I',p1:1, g2:'J',p2:2},
+  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',        city:'Guadalajara, MEX',    g1:'J',p1:1, g2:'I',p2:2},
+  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',          city:'Houston, EUA',        g1:'K',p1:1, g2:'L',p2:2},
+  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',          city:'Seattle, EUA',        g1:'L',p1:1, g2:'K',p2:2},
+  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',     city:'Boston, EUA',         g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
+  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',         city:'Monterrey, MEX',      g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
+  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',   g1:'?',p1:0, g2:'?',p2:0, label1:'Melhor 3o (A/B/C)', label2:'Melhor 3o (D/E/F)'},
+  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',       city:'Cidade do México, MEX',g1:'?',p1:0,g2:'?',p2:0, label1:'Melhor 3o (G/H/I)', label2:'Melhor 3o (J/K/L)'},
 ];
+
+// Retorna nome do time na posição p (1=1o, 2=2o) do grupo g, usando STANDINGS atual
+function getStandingTeam(g, p) {
+  var grp = STANDINGS[g];
+  if (!grp || grp.length < p) return 'A definir';
+  var sorted = sortGroup(grp);
+  var t = sorted[p - 1];
+  return t ? (TEAM_NAMES[t.abbr] || t.team || t.abbr) : 'A definir';
+}
+
+function buildBracket() {
+  return BRACKET_STRUCTURE.map(function(b) {
+    var team1 = b.g1 === '?' ? '?' : getStandingTeam(b.g1, b.p1);
+    var team2 = b.g2 === '?' ? '?' : getStandingTeam(b.g2, b.p2);
+    var seed1 = b.label1 || (b.p1 + 'o Grupo ' + b.g1);
+    var seed2 = b.label2 || (b.p2 + 'o Grupo ' + b.g2);
+    var note  = (team1 === 'A definir' || team2 === 'A definir') ? 'Aguardando encerramento dos grupos' : '';
+    return { matchup:b.matchup, date:b.date, venue:b.venue, city:b.city,
+             seed1:seed1, team1:team1, seed2:seed2, team2:team2, note:note };
+  });
+}
 
 // FLAGS
 var FLAGS = {
@@ -1871,24 +1892,27 @@ function renderGameCard(g) {
 
 function renderBracket() {
   var container = document.getElementById('bracket-container');
+  var bracket = buildBracket();
+  var allDefined = bracket.every(function(b) { return b.team1 !== 'A definir' && b.team2 !== 'A definir'; });
   var html =
     '<div class="phase-toggle phase-toggle-static expanded">' +
       '<span class="phase-toggle-left">' +
-        '<span class="phase-title">Proxima fase &mdash; Dezesseis-avos de final</span>' +
+        '<span class="phase-title">Proxima fase — Dezesseis-avos de final</span>' +
       '</span>' +
       '<span class="phase-toggle-hint">32 times</span>' +
     '</div>' +
     '<div class="bracket-section">' +
-    '<div class="bracket-note"><strong>Projecao baseada na classificacao ate a 2a rodada.</strong> ' +
-    'Os duelos definitivos serao confirmados apos o termino da 3a rodada (25-26 jun).</div>' +
+    (allDefined ? '' : '<div class="bracket-note"><strong>Chaveamento baseado na classificacao atual.</strong> Times em italico aguardam encerramento da fase de grupos.</div>') +
     '<div class="bracket-grid">' +
-    BRACKET.map(function(b) {
+    bracket.map(function(b) {
+      var t1p = b.team1 === 'A definir' || b.team1 === '?';
+      var t2p = b.team2 === 'A definir' || b.team2 === '?';
       return '<div class="bracket-card">' +
         '<div class="bracket-card-head"><span class="bracket-card-title">' + b.matchup + '</span><span class="bracket-card-date">' + b.date + '</span></div>' +
         '<div class="bracket-matchup">' +
-          '<div class="bm-row"><span class="bm-seed">' + b.seed1 + '</span><span class="bm-team">' + b.team1 + '</span></div>' +
+          '<div class="bm-row"><span class="bm-seed">' + b.seed1 + '</span><span class="bm-team' + (t1p ? ' bm-qualifier' : '') + '">' + b.team1 + '</span></div>' +
           '<div class="bm-vs">vs</div>' +
-          '<div class="bm-row"><span class="bm-seed">' + b.seed2 + '</span><span class="bm-team' + (b.note ? ' bm-qualifier' : '') + '">' + b.team2 + '</span></div>' +
+          '<div class="bm-row"><span class="bm-seed">' + b.seed2 + '</span><span class="bm-team' + (t2p ? ' bm-qualifier' : '') + '">' + b.team2 + '</span></div>' +
         '</div>' +
         '<div class="bm-venue">&#128205; <strong>' + b.venue + '</strong> &middot; ' + b.city + (b.note ? ' &middot; <em>' + b.note + '</em>' : '') + '</div>' +
         '</div>';
