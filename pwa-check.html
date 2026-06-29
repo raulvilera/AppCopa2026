@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico PWA</title>
+<style>
+body { font-family: monospace; background: #111; color: #eee; padding: 20px; font-size: 14px; }
+.ok { color: #4caf50; }
+.err { color: #f44336; }
+.warn { color: #ff9800; }
+h2 { color: #D4AF37; }
+pre { background: #222; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+</style>
+</head>
+<body>
+<h2>🔍 Diagnóstico PWA — Copa 2026</h2>
+<div id="results"></div>
+<script>
+const out = document.getElementById('results');
+function log(msg, cls='') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.innerHTML = msg;
+  out.appendChild(d);
+}
+
+// 1. Service Worker
+log('<br><b>1. Service Worker</b>');
+if ('serviceWorker' in navigator) {
+  log('✅ API disponível', 'ok');
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    if (regs.length === 0) {
+      log('❌ Nenhum SW registrado!', 'err');
+    } else {
+      regs.forEach(r => log('✅ SW registrado: ' + r.scope + ' | state: ' + (r.active ? r.active.state : 'sem active'), 'ok'));
+    }
+  });
+} else {
+  log('❌ Service Worker não suportado', 'err');
+}
+
+// 2. Manifest
+log('<br><b>2. Manifest</b>');
+fetch('/manifest.json').then(r => {
+  log('Content-Type: ' + r.headers.get('content-type'));
+  log('Cache-Control: ' + r.headers.get('cache-control'));
+  log('Status: ' + r.status + ' ' + (r.ok ? '✅' : '❌'), r.ok ? 'ok' : 'err');
+  return r.json();
+}).then(m => {
+  log('✅ JSON válido', 'ok');
+  log('display: ' + m.display + (m.display === 'standalone' ? ' ✅' : ' ❌'), m.display === 'standalone' ? 'ok' : 'err');
+  log('start_url: ' + m.start_url);
+  log('scope: ' + m.scope);
+  log('icons: ' + m.icons.length + ' ícone(s)');
+  m.icons.forEach(ic => {
+    fetch(ic.src).then(r2 => {
+      log((r2.ok ? '✅' : '❌') + ' Ícone ' + ic.sizes + ' (' + ic.purpose + '): ' + r2.status, r2.ok ? 'ok' : 'err');
+    });
+  });
+}).catch(e => log('❌ Erro manifest: ' + e, 'err'));
+
+// 3. beforeinstallprompt
+log('<br><b>3. Install Prompt</b>');
+log('⏳ Aguardando evento beforeinstallprompt...', 'warn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  log('✅ beforeinstallprompt DISPARADO! PWA instalável!', 'ok');
+  log('Plataformas: ' + e.platforms.join(', '));
+});
+window.addEventListener('appinstalled', () => log('✅ App instalado!', 'ok'));
+
+// 4. HTTPS
+log('<br><b>4. HTTPS</b>');
+log(location.protocol === 'https:' ? '✅ HTTPS OK' : '❌ Não é HTTPS', location.protocol === 'https:' ? 'ok' : 'err');
+
+// Timeout para beforeinstallprompt
+setTimeout(() => {
+  const lines = out.querySelectorAll('.warn');
+  if (lines.length > 0) {
+    log('⚠️ beforeinstallprompt não disparou em 5s — Chrome ainda não considera instalável', 'warn');
+  }
+}, 5000);
+</script>
+</body>
+</html>
