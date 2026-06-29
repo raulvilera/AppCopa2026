@@ -244,6 +244,60 @@ body {
 .filter-btn:hover { color: var(--chalk); border-color: var(--chalk-faint); }
 .filter-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
 
+/* ── FASES RETRÁTEIS (Jogos) ── */
+.phase-block { margin-bottom: 22px; }
+.phase-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--chalk);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.phase-toggle:hover { border-color: var(--gold-line); }
+.phase-toggle:active { background: var(--bg-3); }
+.phase-toggle-left { display: flex; align-items: center; gap: 10px; }
+.phase-chevron {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--gold);
+  transition: transform 0.25s ease;
+}
+.phase-toggle.expanded .phase-chevron { transform: rotate(90deg); }
+.phase-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.phase-toggle-hint {
+  font-family: var(--font-head);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--chalk-dim);
+  white-space: nowrap;
+}
+.phase-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+  overflow: hidden;
+}
+.phase-collapsible.expanded { grid-template-rows: 1fr; }
+.phase-collapsible-inner { overflow: hidden; min-height: 0; padding-top: 16px; }
+.phase-toggle-static { cursor: default; margin-bottom: 16px; }
+.phase-toggle-static:hover { border-color: var(--line); background: var(--bg-2); }
+.phase-toggle-static .phase-chevron { display: none; }
+
 .round-block { margin-bottom: 36px; }
 .round-header {
   display: flex;
@@ -1420,14 +1474,32 @@ footer {
 
   <!-- TAB: JOGOS -->
   <section class="tab-panel active" id="panel-jogos">
-    <div class="games-filters" id="games-filters">
-      <button class="filter-btn active" data-filter="all">Todos os jogos</button>
-      <button class="filter-btn" data-filter="final">Finalizados</button>
-      <button class="filter-btn" data-filter="scheduled">Proximos</button>
-      <button class="filter-btn" data-filter="bracket">Chaveamento</button>
+
+    <!-- PRÓXIMA FASE — sempre visível -->
+    <div class="phase-block">
+      <div id="bracket-container"></div>
     </div>
-    <div id="games-container"><div style="padding:40px;text-align:center;color:rgba(239,242,236,0.4);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.1em;text-transform:uppercase">Carregando jogos...</div></div>
-    <div id="bracket-container" style="display:none"></div>
+
+    <!-- FASE DE GRUPOS — retraída por padrão, expande ao tocar -->
+    <div class="phase-block phase-groupstage">
+      <button class="phase-toggle" id="groupstage-toggle" onclick="toggleGroupStage()" aria-expanded="false">
+        <span class="phase-toggle-left">
+          <span class="phase-chevron" id="groupstage-chevron">&#9656;</span>
+          <span class="phase-title">Fase de grupos</span>
+        </span>
+        <span class="phase-toggle-hint" id="groupstage-hint">Toque para expandir</span>
+      </button>
+      <div class="phase-collapsible" id="groupstage-collapsible">
+        <div class="phase-collapsible-inner">
+          <div class="games-filters" id="games-filters">
+            <button class="filter-btn active" data-filter="all">Todos os jogos</button>
+            <button class="filter-btn" data-filter="final">Finalizados</button>
+            <button class="filter-btn" data-filter="scheduled">Proximos</button>
+          </div>
+          <div id="games-container"><div style="padding:40px;text-align:center;color:rgba(239,242,236,0.4);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.1em;text-transform:uppercase">Carregando jogos...</div></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- TAB: CLASSIFICACAO -->
@@ -1467,7 +1539,7 @@ footer {
 
   <footer>
     Dados da fase de grupos da Copa do Mundo 2026 conforme Sportradar / FIFA.<br>
-    Jogos ate 24 jun 2026 (hora de Brasilia). Chaveamento das oitavas baseado na classificacao atual.
+    Jogos ate 24 jun 2026 (hora de Brasilia). Chaveamento dos dezesseis-avos baseado na classificacao atual.
   </footer>
 </div>
 
@@ -1571,22 +1643,22 @@ var STARS = {
 
 // CHAVEAMENTO
 var BRACKET = [
-  {matchup:'Oitavas 1',date:'29 jun',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',seed1:'1o Grupo A',team1:'México',seed2:'2o Grupo B',team2:'Bósnia',note:''},
-  {matchup:'Oitavas 2',date:'29 jun',venue:'Hard Rock Stadium',city:'Miami, EUA',seed1:'1o Grupo B',team1:'Suica',seed2:'2o Grupo A',team2:'Africa do Sul',note:''},
-  {matchup:'Oitavas 3',date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',seed1:'1o Grupo C',team1:'Brasil',seed2:'2o Grupo D',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 4',date:'30 jun',venue:'AT&T Stadium',city:'Dallas, EUA',seed1:'1o Grupo D',team1:'A definir',seed2:'2o Grupo C',team2:'Marrocos',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 5',date:'01 jul',venue:'SoFi Stadium',city:'Los Angeles, EUA',seed1:'1o Grupo E',team1:'A definir',seed2:'2o Grupo F',team2:'A definir',note:'Aguardando Rodadas 3'},
-  {matchup:'Oitavas 6',date:'01 jul',venue:'Arrowhead Stadium',city:'Kansas City, EUA',seed1:'1o Grupo F',team1:'A definir',seed2:'2o Grupo E',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 7',date:'02 jul',venue:'Levis Stadium',city:'Sao Francisco, EUA',seed1:'1o Grupo G',team1:'A definir',seed2:'2o Grupo H',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 8',date:'02 jul',venue:'BC Place',city:'Vancouver, CAN',seed1:'1o Grupo H',team1:'A definir',seed2:'2o Grupo G',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 9',date:'03 jul',venue:'Rose Bowl',city:'Los Angeles, EUA',seed1:'1o Grupo I',team1:'A definir',seed2:'2o Grupo J',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 10',date:'03 jul',venue:'Estadio Akron',city:'Guadalajara, MEX',seed1:'1o Grupo J',team1:'Argentina',seed2:'2o Grupo I',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 11',date:'04 jul',venue:'NRG Stadium',city:'Houston, EUA',seed1:'1o Grupo K',team1:'A definir',seed2:'2o Grupo L',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 12',date:'04 jul',venue:'Lumen Field',city:'Seattle, EUA',seed1:'1o Grupo L',team1:'A definir',seed2:'2o Grupo K',team2:'A definir',note:'Aguardando Rodada 3'},
-  {matchup:'Oitavas 13',date:'05 jul',venue:'Gillette Stadium',city:'Boston, EUA',seed1:'Melhor 3o (A/B/C)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Oitavas 14',date:'05 jul',venue:'Estadio BBVA',city:'Monterrey, MEX',seed1:'Melhor 3o (D/E/F)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Oitavas 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',seed1:'Melhor 3o (G/H/I)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
-  {matchup:'Oitavas 16',date:'06 jul',venue:'Estadio Azteca',city:'Cidade do México, MEX',seed1:'Melhor 3o (J/K/L)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Dezesseis-avos 1',date:'29 jun',venue:'MetLife Stadium',city:'Nova York/NJ, EUA',seed1:'1o Grupo A',team1:'México',seed2:'2o Grupo B',team2:'Bósnia',note:''},
+  {matchup:'Dezesseis-avos 2',date:'29 jun',venue:'Hard Rock Stadium',city:'Miami, EUA',seed1:'1o Grupo B',team1:'Suica',seed2:'2o Grupo A',team2:'Africa do Sul',note:''},
+  {matchup:'Dezesseis-avos 3',date:'30 jun',venue:'Mercedes-Benz Stadium',city:'Atlanta, EUA',seed1:'1o Grupo C',team1:'Brasil',seed2:'2o Grupo D',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 4',date:'30 jun',venue:'AT&T Stadium',city:'Dallas, EUA',seed1:'1o Grupo D',team1:'A definir',seed2:'2o Grupo C',team2:'Marrocos',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 5',date:'01 jul',venue:'SoFi Stadium',city:'Los Angeles, EUA',seed1:'1o Grupo E',team1:'A definir',seed2:'2o Grupo F',team2:'A definir',note:'Aguardando Rodadas 3'},
+  {matchup:'Dezesseis-avos 6',date:'01 jul',venue:'Arrowhead Stadium',city:'Kansas City, EUA',seed1:'1o Grupo F',team1:'A definir',seed2:'2o Grupo E',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 7',date:'02 jul',venue:'Levis Stadium',city:'Sao Francisco, EUA',seed1:'1o Grupo G',team1:'A definir',seed2:'2o Grupo H',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 8',date:'02 jul',venue:'BC Place',city:'Vancouver, CAN',seed1:'1o Grupo H',team1:'A definir',seed2:'2o Grupo G',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 9',date:'03 jul',venue:'Rose Bowl',city:'Los Angeles, EUA',seed1:'1o Grupo I',team1:'A definir',seed2:'2o Grupo J',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 10',date:'03 jul',venue:'Estadio Akron',city:'Guadalajara, MEX',seed1:'1o Grupo J',team1:'Argentina',seed2:'2o Grupo I',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 11',date:'04 jul',venue:'NRG Stadium',city:'Houston, EUA',seed1:'1o Grupo K',team1:'A definir',seed2:'2o Grupo L',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 12',date:'04 jul',venue:'Lumen Field',city:'Seattle, EUA',seed1:'1o Grupo L',team1:'A definir',seed2:'2o Grupo K',team2:'A definir',note:'Aguardando Rodada 3'},
+  {matchup:'Dezesseis-avos 13',date:'05 jul',venue:'Gillette Stadium',city:'Boston, EUA',seed1:'Melhor 3o (A/B/C)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Dezesseis-avos 14',date:'05 jul',venue:'Estadio BBVA',city:'Monterrey, MEX',seed1:'Melhor 3o (D/E/F)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Dezesseis-avos 15',date:'06 jul',venue:'Lincoln Financial Field',city:'Filadélfia, EUA',seed1:'Melhor 3o (G/H/I)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
+  {matchup:'Dezesseis-avos 16',date:'06 jul',venue:'Estadio Azteca',city:'Cidade do México, MEX',seed1:'Melhor 3o (J/K/L)',team1:'A definir',seed2:'A definir',team2:'A definir',note:''},
 ];
 
 // FLAGS
@@ -1700,17 +1772,9 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
 // ════════════════════════════════════════
 function renderGames() {
   var container = document.getElementById('games-container');
-  var bracket   = document.getElementById('bracket-container');
 
-  if (currentFilter === 'bracket') {
-    container.style.display = 'none';
-    bracket.style.display   = 'block';
-    renderBracket();
-    return;
-  }
-
-  container.style.display = 'block';
-  bracket.style.display   = 'none';
+  // A próxima fase (chaveamento) é sempre renderizada, independente do filtro
+  renderBracket();
 
   var games = GAMES;
   if (currentFilter === 'final')     games = GAMES.filter(function(g) { return g.status === 'final'; });
@@ -1736,6 +1800,18 @@ function renderGames() {
   });
 
   container.innerHTML = html;
+}
+
+// Expande/retrai a fase de grupos (retraída por padrão)
+function toggleGroupStage() {
+  var collapsible = document.getElementById('groupstage-collapsible');
+  var toggleBtn   = document.getElementById('groupstage-toggle');
+  var hint        = document.getElementById('groupstage-hint');
+  var expanded = !collapsible.classList.contains('expanded');
+  collapsible.classList.toggle('expanded', expanded);
+  toggleBtn.classList.toggle('expanded', expanded);
+  toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  if (hint) hint.textContent = expanded ? 'Toque para recolher' : 'Toque para expandir';
 }
 
 function flag(abbr) {
@@ -1795,7 +1871,14 @@ function renderGameCard(g) {
 
 function renderBracket() {
   var container = document.getElementById('bracket-container');
-  var html = '<div class="bracket-section"><p class="section-label">Oitavas de final - Projecao</p>' +
+  var html =
+    '<div class="phase-toggle phase-toggle-static expanded">' +
+      '<span class="phase-toggle-left">' +
+        '<span class="phase-title">Proxima fase &mdash; Dezesseis-avos de final</span>' +
+      '</span>' +
+      '<span class="phase-toggle-hint">32 times</span>' +
+    '</div>' +
+    '<div class="bracket-section">' +
     '<div class="bracket-note"><strong>Projecao baseada na classificacao ate a 2a rodada.</strong> ' +
     'Os duelos definitivos serao confirmados apos o termino da 3a rodada (25-26 jun).</div>' +
     '<div class="bracket-grid">' +
@@ -2278,176 +2361,3 @@ function handleRefresh() {
   loadData(true);
 }
 
-function showToast(msg) {
-  var toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(function() { toast.classList.remove('show'); }, 3400);
-}
-
-// ════════════════════════════════════════
-// API — fetch e integração
-// ════════════════════════════════════════
-var _apiCache   = null;
-var _cacheTs    = 0;
-var _autoRefresh = null;
-var CACHE_TTL   = 3 * 60 * 1000;
-
-// getStatusInfo removido — formato openfootball já vem normalizado do scores.js
-
-function fixtureToGame(f) {
-  // Formato openfootball — campos já normalizados pelo scores.js
-  return {
-    r:      f.r      || 1,
-    group:  f.group  || '?',
-    home:   f.home   || '?',
-    away:   f.away   || '?',
-    hs:     f.hs,
-    as:     f.as,
-    status: f.status || 'scheduled',
-    date:   f.date   || '',
-    time:   f.time   || '',
-    venue:  f.venue  || '',
-    city:   f.city   || '',
-  };
-}
-
-function parseStandings(standingsObj) {
-  // openfootball já retorna objeto {A:[...], B:[...]}
-  if (!standingsObj || typeof standingsObj !== 'object') return {};
-  // Garantir que cada time tem propriedades esperadas pelo renderGroups
-  var result = {};
-  Object.keys(standingsObj).forEach(function(grp) {
-    result[grp] = standingsObj[grp].map(function(t) {
-      return {
-        team: TEAM_NAMES[t.abbr] || t.team || t.abbr,
-        abbr: t.abbr,
-        w:    t.w   || 0,
-        d:    t.d   || 0,
-        l:    t.l   || 0,
-        pts:  t.pts || 0,
-        gp:   t.gp  || 0,
-        gc:   t.gc  || 0,
-      };
-    });
-  });
-  return result;
-}
-
-function parseScorers(scorersArr) {
-  if (!scorersArr || !scorersArr.length) return [];
-  return scorersArr.slice(0,15).map(function(s, i) {
-    return {
-      id:      'api_' + i,
-      name:    s.name  || '—',
-      team:    TEAM_NAMES[s.abbr] || s.team || s.abbr || '?',
-      abbr:    s.abbr  || '?',
-      goals:   s.goals   || 0,
-      assists: s.assists || 0,
-      shots:   0,
-      minutes: 0,
-      bio:     '',
-      games:   [],
-    };
-  });
-}
-
-
-async function loadData(manual) {
-  if (manual) {
-    var btn = document.querySelector('.refresh-btn');
-    if (btn) { btn.classList.add('spinning'); setTimeout(function(){btn.classList.remove('spinning')},600); }
-  }
-
-  // Cache local no browser
-  var now = Date.now();
-  if (_apiCache && (now - _cacheTs) < CACHE_TTL) {
-    applyData(_apiCache);
-    if (manual) showToast('Dados em cache — próxima busca em breve.');
-    return;
-  }
-
-  try {
-    var res = await fetch('/api/scores');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
-    _apiCache = json;
-    _cacheTs  = now;
-    applyData(json);
-    updateTimestamp(json);
-
-    // Auto-refresh se houver jogo ao vivo
-    var hasLive = (json.fixtures||[]).some(function(f){
-      return f.status === 'live';
-    });
-    clearInterval(_autoRefresh);
-    if (hasLive) {
-      _autoRefresh = setInterval(function(){loadData(false)},60000);
-      showToast('&#9679; Jogo ao vivo! Atualizando a cada 1 min.');
-    }
-  } catch(err) {
-    console.error('[copa-api]', err.message);
-    showToast('Erro API: ' + err.message);
-    // Mostrar erro visível no container
-    var c = document.getElementById('games-container');
-    if (c && !_apiCache) {
-      c.innerHTML = '<div style="padding:20px;color:#C0392B;font-family:Barlow Condensed,sans-serif;font-size:13px">' +
-        '⚠ Erro ao carregar: ' + err.message + '<br><br>' +
-        '<a href="/api/scores?debug=1" style="color:#D4A843">Testar API</a></div>';
-    }
-    if (!_apiCache) { renderGroups(); renderScorers(); }
-  }
-}
-
-function applyData(json) {
-  try {
-    API_GAMES     = (json.fixtures || []).map(fixtureToGame);
-    API_STANDINGS = parseStandings(json.standings || {});
-    API_SCORERS   = parseScorers(json.scorers || []);
-    GAMES     = API_GAMES.length ? API_GAMES : GAMES;
-    STANDINGS = Object.keys(API_STANDINGS).length ? API_STANDINGS : STANDINGS;
-    SCORERS   = API_SCORERS.length ? API_SCORERS : SCORERS;
-    renderGames();
-    renderGroups();
-    renderScorers();
-    renderPositions();
-    console.log('[copa] Dados aplicados:', API_GAMES.length, 'jogos,', Object.keys(API_STANDINGS).length, 'grupos');
-  } catch(e) {
-    console.error('[copa] Erro em applyData:', e);
-    var c = document.getElementById('games-container');
-    if (c) c.innerHTML = '<div style="padding:20px;color:#C0392B;font-family:Barlow Condensed,sans-serif">⚠ Erro interno: ' + e.message + '</div>';
-  }
-}
-
-function updateTimestamp(json) {
-  var el = document.getElementById('update-time');
-  if (!el) el = document.querySelector('.last-update strong');
-  if (!el) return;
-  var d = new Date();
-  el.textContent = d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) +
-    ' · ' + d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) +
-    (json.cached ? ' ⚡ cache' : ' 🟢 ao vivo');
-}
-
-// ════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════
-// Render inicial com dados hardcoded (fallback)
-renderGames();
-renderGroups();
-renderScorers();
-renderPositions();
-// Busca dados reais
-loadData(false);
-// Auto-refresh a cada 3 min
-setInterval(function(){ loadData(false); }, CACHE_TTL);
-</script>
-<script>
-// Suprimir botão PWA "Adicionar à tela inicial" do Chrome
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-});
-</script>
-</body>
-</html>
