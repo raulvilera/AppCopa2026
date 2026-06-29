@@ -2361,3 +2361,102 @@ function handleRefresh() {
   loadData(true);
 }
 
+// ════════════════════════════════════════
+// LOAD DATA — busca /api/scores e atualiza
+// ════════════════════════════════════════
+var _lastFetch = 0;
+var CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+
+function renderAll() {
+  renderGames();
+  renderGroups();
+  renderScorers();
+  renderPositions();
+}
+
+function loadData(force) {
+  var now = Date.now();
+  if (!force && (now - _lastFetch) < CACHE_TTL_MS) return;
+
+  // Indicador visual de carregamento
+  var refreshBtn = document.getElementById('refresh-btn');
+  if (refreshBtn) refreshBtn.classList.add('loading');
+
+  fetch('/api/scores')
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(payload) {
+      _lastFetch = Date.now();
+
+      // Atualiza fixtures → GAMES
+      if (payload.fixtures && payload.fixtures.length > 0) {
+        GAMES = payload.fixtures;
+        API_GAMES = payload.fixtures;
+      }
+
+      // Atualiza standings → STANDINGS
+      if (payload.standings && Object.keys(payload.standings).length > 0) {
+        var newStandings = {};
+        Object.keys(payload.standings).forEach(function(grp) {
+          newStandings[grp] = payload.standings[grp].map(function(t) {
+            return {
+              team: t.team || t.abbr,
+              abbr: t.abbr,
+              w:    t.w   || 0,
+              d:    t.d   || 0,
+              l:    t.l   || 0,
+              pts:  t.pts || 0,
+              gp:   t.gp  || t.gf || 0,  // gols pró
+              gc:   t.gc  || 0,
+            };
+          });
+        });
+        STANDINGS = newStandings;
+        API_STANDINGS = newStandings;
+      }
+
+      // Atualiza artilheiros → SCORERS
+      if (payload.scorers && payload.scorers.length > 0) {
+        SCORERS = payload.scorers.map(function(s) {
+          return {
+            id:      (s.name || '').toLowerCase().replace(/\s+/g, '-'),
+            name:    s.name,
+            team:    s.team || s.abbr,
+            abbr:    s.abbr,
+            goals:   s.goals || 0,
+            assists: s.assists || 0,
+            shots:   s.shots  || 0,
+          };
+        });
+        API_SCORERS = SCORERS;
+      }
+
+      renderAll();
+
+      // Atualiza timestamp de última atualização
+      var el = document.getElementById('update-time');
+      if (el) {
+        var d = new Date(payload.fetchedAt || Date.now());
+        el.textContent = 'Atualizado ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      }
+    })
+    .catch(function(err) {
+      console.warn('[AppCopa] API indisponível, usando dados estáticos:', err.message);
+      renderAll(); // renderiza com fallback estático
+    })
+    .finally(function() {
+      if (refreshBtn) refreshBtn.classList.remove('loading');
+    });
+}
+
+// ════════════════════════════════════════
+// INIT — renderiza ao carregar
+// ════════════════════════════════════════
+renderAll();          // mostra dados estáticos imediatamente
+loadData(true);       // busca API em paralelo e re-renderiza ao receber
+
+</script>
+</body>
+</html>
