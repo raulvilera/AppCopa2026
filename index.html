@@ -2563,6 +2563,15 @@ function loadData(force) {
 renderAll();          // mostra dados estáticos imediatamente
 loadData(true);       // busca API em paralelo e re-renderiza ao receber
 
+// Atualização automática dos placares: a cada 60s em segundo plano,
+// e também assim que o app volta a ficar visível (ex: usuário reabre
+// o app depois de minutos com a tela bloqueada ou em outra aba).
+setInterval(function() { loadData(true); }, 60000);
+
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') loadData(true);
+});
+
 // Registro do Service Worker (necessário para instalação PWA)
 // + atualização automática: quando uma nova versão assume o controle,
 // a página recarrega sozinha para mostrar o conteúdo mais recente.
