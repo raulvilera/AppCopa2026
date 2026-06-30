@@ -1703,7 +1703,9 @@ function buildBracket() {
     var seed2 = b.label2 || (b.p2 ? (b.p2 + 'o Grupo ' + b.g2) : team2);
     var note  = (team1 === 'A definir' || team2 === 'A definir') ? 'Aguardando encerramento dos grupos' : '';
     return { matchup:b.matchup, date:b.date, venue:b.venue, city:b.city,
-             seed1:seed1, team1:team1, seed2:seed2, team2:team2, note:note };
+             seed1:seed1, team1:team1, seed2:seed2, team2:team2, note:note,
+             finished:b.finished||false, score1:b.score1||0, score2:b.score2||0,
+             goals1:b.goals1||[], goals2:b.goals2||[], winner:b.winner||0, inPlay:b.inPlay||false };
   });
 }
 
@@ -1932,6 +1934,7 @@ function renderBracket() {
     bracket.map(function(b) {
       var t1p = b.team1 === 'A definir' || b.team1 === '?';
       var t2p = b.team2 === 'A definir' || b.team2 === '?';
+      var isLive = b.inPlay === true;
       var isFinished = b.finished === true;
       var scoreHtml = (isFinished || isLive)
         ? '<span class="bm-score' + (b.winner===1 ? ' bm-winner-left' : '') + '">' + b.score1 + '</span>' +
@@ -1940,7 +1943,6 @@ function renderBracket() {
         : '<span class="bm-score-vs">vs</span>';
       var goals1Html = (isFinished && b.goals1 && b.goals1.length) ? '<div class="bm-goals bm-goals-left">⚽ ' + b.goals1.join(' · ') + '</div>' : '';
       var goals2Html = (isFinished && b.goals2 && b.goals2.length) ? '<div class="bm-goals bm-goals-right">⚽ ' + b.goals2.join(' · ') + '</div>' : '';
-      var isLive = b.inPlay === true;
       var encLabel = isFinished ? '<span class="bm-finished-label">Encerrado</span>' : (isLive ? '<span class="bm-live-label">🔴 Ao vivo</span>' : '');
       return '<div class="bracket-card' + (isFinished ? ' bracket-card-finished' : isLive ? ' bracket-card-live' : '') + '">' +
         '<div class="bracket-card-head"><span class="bracket-card-title">' + b.matchup + '</span>' + encLabel + '<span class="bracket-card-date">' + b.date + '</span></div>' +
