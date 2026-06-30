@@ -2488,7 +2488,7 @@ function loadData(force) {
         API_GAMES = payload.fixtures;
 
         // Atualiza placares/goleadores dos dezesseis-avos automaticamente
-        var knockoutStages = ['ROUND_OF_32','LAST_32','ROUND_16'];
+        var knockoutStages = ['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
         var knockoutMatches = payload.fixtures.filter(function(f) {
           return knockoutStages.indexOf(f.stage) >= 0;
         });
