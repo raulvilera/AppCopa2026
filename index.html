@@ -563,6 +563,26 @@ body {
   gap: 6px;
   align-items: center;
 }
+.bm-watch-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 14px 12px;
+  padding: 8px 0;
+  background: rgba(220,50,50,.12);
+  border: 1px solid rgba(255,85,85,.4);
+  border-radius: 6px;
+  color: #ff5555;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.bm-watch-live:active { opacity: 0.7; }
+.bm-watch-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff5555; animation: pulse 1s infinite; }
 
 /* ════════════════════════════════════════
    GRUPOS — CARDS SIMPLES (sem expansão inline)
@@ -1917,6 +1937,11 @@ function renderGameCard(g) {
     '</div>';
 }
 
+function watchLiveUrl(team1, team2) {
+  var q = 'assistir ' + team1 + ' x ' + team2 + ' ao vivo';
+  return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+}
+
 function renderBracket() {
   var container = document.getElementById('bracket-container');
   var bracket = buildBracket();
@@ -1957,6 +1982,7 @@ function renderBracket() {
           (goals1Html || goals2Html ? '<div class="bm-goals-row">' + goals1Html + goals2Html + '</div>' : '') +
         '</div>' +
         '<div class="bm-venue">&#128205; <strong>' + b.venue + '</strong> &middot; ' + b.city + (b.note ? ' &middot; <em>' + b.note + '</em>' : '') + '</div>' +
+        (isLive ? '<a class="bm-watch-live" href="' + watchLiveUrl(b.team1, b.team2) + '" target="_blank" rel="noopener"><span class="bm-watch-live-dot"></span>Assistir ao vivo</a>' : '') +
         '</div>';
     }).join('') + '</div></div>';
   container.innerHTML = html;
