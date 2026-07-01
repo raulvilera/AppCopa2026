@@ -1938,8 +1938,9 @@ function renderGameCard(g) {
 }
 
 function watchLiveUrl(team1, team2) {
-  var q = 'assistir ' + team1 + ' x ' + team2 + ' ao vivo';
-  return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+  // CazéTV transmite ao vivo e de graça os 104 jogos da Copa do Mundo 2026
+  // (parceria oficial com a FIFA), então o botão leva direto pro canal.
+  return 'https://www.youtube.com/@CazeTV/streams';
 }
 
 function renderBracket() {
@@ -1982,7 +1983,7 @@ function renderBracket() {
           (goals1Html || goals2Html ? '<div class="bm-goals-row">' + goals1Html + goals2Html + '</div>' : '') +
         '</div>' +
         '<div class="bm-venue">&#128205; <strong>' + b.venue + '</strong> &middot; ' + b.city + (b.note ? ' &middot; <em>' + b.note + '</em>' : '') + '</div>' +
-        (isLive ? '<a class="bm-watch-live" href="' + watchLiveUrl(b.team1, b.team2) + '" target="_blank" rel="noopener"><span class="bm-watch-live-dot"></span>Assistir ao vivo</a>' : '') +
+        (isLive ? '<a class="bm-watch-live" href="' + watchLiveUrl(b.team1, b.team2) + '" target="_blank" rel="noopener"><span class="bm-watch-live-dot"></span>Assistir na CazéTV</a>' : '') +
         '</div>';
     }).join('') + '</div></div>';
   container.innerHTML = html;
