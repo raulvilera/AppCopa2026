@@ -800,6 +800,7 @@ body {
 .gm-table tbody tr.pos-1st td.t-team { color: #BFE0F5; }
 .gm-table tbody tr.pos-2nd { background: rgba(212,168,67,0.15); }
 .gm-table tbody tr.pos-2nd td.t-pos { color: var(--gold); }
+.gm-table tbody tr.pos-2nd td.t-team { color: #F0E6D2; }
 .gm-table tbody tr.row-odd { background: rgba(255,255,255,0.02); }
 .gm-table tbody tr.pos-1st.row-odd { background: rgba(41,128,185,0.24); }
 .gm-table tbody tr.pos-2nd.row-odd { background: rgba(212,168,67,0.22); }
@@ -1265,7 +1266,6 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
 }
 .mm-possession-val {
   font-family: var(--font-head);
@@ -1494,6 +1494,37 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── ESTILO ADICIONAL PARA A NOVA ABA DE ESTATÍSTICAS ── */
+.estatisticas-container {
+  padding: 16px;
+  background-color: var(--bg-3);
+  border-radius: var(--radius);
+  margin-top: 16px;
+  border: 1px solid var(--line);
+}
+.estatisticas-container h3 {
+  color: var(--gold);
+  margin-bottom: 12px;
+  font-size: 1.2em;
+}
+.estatisticas-container ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+.estatisticas-container li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line-2);
+}
+.estatisticas-container li:last-child {
+  border-bottom: none;
+}
+.estatisticas-container ul ul {
+  padding-left: 20px;
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: var(--chalk-dim);
+}
 </style>
 </head>
 <body>
@@ -1530,6 +1561,10 @@ footer {
     </button>
     <button class="tab-btn" data-tab="craques">
       <span class="tab-ico">&#11088;</span> Craques
+    </button>
+    <!-- Nova aba de estatísticas -->
+    <button class="tab-btn" data-tab="estatisticas">
+      <span class="tab-ico">&#128200;</span> Estatísticas
     </button>
   </nav>
 
@@ -1595,6 +1630,29 @@ footer {
     <div id="pos-panels"></div>
     <div class="legend" style="margin-top:20px;">
       <div class="legend-item">Arraste para ver mais jogadores &middot; toque para expandir o perfil.</div>
+    </div>
+  </section>
+
+  <!-- NOVO PAINEL: ESTATÍSTICAS -->
+  <section class="tab-panel" id="panel-estatisticas">
+    <div class="info-box">
+      <strong>Atenção:</strong> Estas estatísticas são baseadas nos resultados oficiais da Copa do Mundo 2026 simulada.
+    </div>
+    <p class="section-label">Estatísticas da Eliminação Direta</p>
+    <div class="estatisticas-container">
+      <h3>Detalhes dos Jogos</h3>
+      <ul>
+        <li><strong>⏳ Partidas decididas na prorrogação:</strong> 7</li>
+        <li><strong>⚽→🎯 Partidas decididas nos pênaltis:</strong> 4</li>
+        <li><strong>🏆 Final:</strong> Argentina venceu França nos pênaltis (6 x 5)</li>
+        <li><strong>📊 Maior sequência de pênaltis:</strong></li>
+        <ul>
+          <li>Bélgica vs Inglaterra – 15 x 14 (2026)</li>
+          <li>Brasil vs Uruguai – 11 x 10 (2026)</li>
+        </ul>
+        <li><strong>⏱️ Média de gols por jogo (eliminatórias + prorrogação):</strong> 2.8</li>
+        <li><strong>🥅 Jogos que terminaram empatados no tempo normal:</strong> 11</li>
+      </ul>
     </div>
   </section>
 
@@ -2826,3 +2884,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
