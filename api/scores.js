@@ -221,7 +221,9 @@ export default async function handler(req, res) {
       const homeNameEn = m.homeTeam?.name || '';
       const awayNameEn = m.awayTeam?.name || '';
       const espnEv = findEspnMatch(espnEvents, homeNameEn, awayNameEn, m.utcDate);
+      let espnId = null;
       if (espnEv) {
+        espnId = espnEv.id;
         const comp = espnEv.competitions[0];
         const espnStatus = espnStatusToOurs(comp.status?.type);
         const home = comp.competitors.find(c => c.homeAway === 'home');
@@ -258,6 +260,7 @@ export default async function handler(req, res) {
 
       return {
         id:      m.id,
+        espnId,
         stage,
         matchday: m.matchday,
         utcDate: m.utcDate,
