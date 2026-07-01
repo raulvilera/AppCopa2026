@@ -62,42 +62,67 @@ export default async function handler(req, res) {
 
     // --- ESTATÍSTICAS DE TIME (posse, chutes, cartões, escanteios...) ---
     const boxTeams = data.boxscore?.teams || [];
+    const PCT_KEYS = ['possessionpct', 'ballpossession', 'passaccuracy', 'passpct'];
     const teamStatsFor = (teamId) => {
       const entry = boxTeams.find(t => t.team?.id === teamId);
       if (!entry) return [];
       return (entry.statistics || [])
-        .map(s => ({
-          key: statKey(s.name),
-          label: STAT_LABELS[statKey(s.name)] || s.label || s.displayName || s.name,
-          value: s.displayValue ?? s.value ?? '',
-        }))
+        .map(s => {
+          const key = statKey(s.name);
+          let value = s.displayValue ?? s.value ?? '';
+          // A ESPN às vezes não manda displayValue pra esses campos e devolve
+          // a fração crua (ex: 0.9) em vez de já formatado em porcentagem.
+          if (PCT_KEYS.includes(key) && typeof value !== 'string') {
+            value = Math.round(value <= 1 ? value * 100 : value) + '%';
+          } else if (PCT_KEYS.includes(key) && /^[\d.]+$/.test(String(value))) {
+            const n = parseFloat(value);
+            value = Math.round(n <= 1 ? n * 100 : n) + '%';
+          }
+          return { key, label: STAT_LABELS[key] || s.label || s.displayName || s.name, value };
+        })
         .filter(s => STAT_LABELS[s.key]); // só mostra o que sabemos rotular com confiança
     };
     const homeStats = home ? teamStatsFor(home.team?.id) : [];
     const awayStats = away ? teamStatsFor(away.team?.id) : [];
 
     // --- SUBSTITUIÇÕES E CARTÕES (via lista de lances, quando disponível) ---
-    const plays = data.plays || comp?.details || [];
-    const events = plays
+    // A ESPN varia o formato: às vezes usa "athletesInvolved", às vezes
+    // "participants[].athlete" — combinamos as duas fontes (resumo compacto
+    // do placar tem só gols; a lista de lances completa, quando existe,
+    // tem substituições/cartões) e tentamos os dois formatos de jogador.
+    function athleteName(p, idx) {
+      const a1 = p.athletesInvolved && p.athletesInvolved[idx];
+      if (a1) return a1.displayName || a1.athlete?.displayName || '';
+      const a2 = p.participants && p.participants[idx];
+      if (a2) return a2.athlete?.displayName || a2.displayName || '';
+      return '';
+    }
+    const rawPlays = [...(comp?.details || []), ...(data.plays || [])];
+    const seen = new Set();
+    const events = rawPlays
       .map(p => {
         const typeText = p.type?.text || p.text || '';
         const isSub = /substitution/i.test(typeText);
-        const isCard = /yellow card|red card/i.test(typeText);
+        const isCard = /yellow card|red card|booking/i.test(typeText);
         const isGoal = p.scoringPlay || /goal/i.test(typeText);
         if (!isSub && !isCard && !isGoal) return null;
         const teamId = p.team?.id;
         const side = home && teamId === home.team?.id ? 'home' : (away && teamId === away.team?.id ? 'away' : null);
-        const athletes = p.athletesInvolved || [];
+        const minute = p.clock?.displayValue || '';
+        const dedupeKey = minute + '|' + typeText + '|' + teamId + '|' + athleteName(p, 0);
+        if (seen.has(dedupeKey)) return null;
+        seen.add(dedupeKey);
         return {
-          minute: p.clock?.displayValue || '',
+          minute,
           side,
           kind: isSub ? 'SUB' : isCard ? (/red/i.test(typeText) ? 'RED' : 'YELLOW') : 'GOAL',
-          playerIn:  isSub ? (athletes[0]?.displayName || '') : '',
-          playerOut: isSub ? (athletes[1]?.displayName || '') : '',
-          player:    !isSub ? (athletes[0]?.displayName || '') : '',
+          playerIn:  isSub ? athleteName(p, 0) : '',
+          playerOut: isSub ? athleteName(p, 1) : '',
+          player:    !isSub ? athleteName(p, 0) : '',
         };
       })
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(ev => ev.kind === 'SUB' || ev.kind === 'RED' || ev.kind === 'YELLOW' ? true : !!ev.player); // esconde gol sem nome (dado incompleto)
 
     // --- DESTAQUES INDIVIDUAIS (só se a ESPN realmente disponibilizar) ---
     // A ESPN nem sempre expõe estatística individual detalhada (passes,
