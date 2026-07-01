@@ -44,18 +44,27 @@ async function fetchJson(path) {
   return res.json();
 }
 
+// Cache em memória (persiste entre invocações "quentes" da função na Vercel).
+// Os gols de uma partida ENCERRADA nunca mudam, então uma vez buscados
+// não precisamos gastar cota da API de novo pro mesmo jogo.
+const goalsCache = new Map();
+
 // A lista de partidas (bulk) não traz os goleadores — isso só vem
 // ao buscar uma partida específica pelo id. Por isso, para jogos do
 // mata-mata já finalizados/ao vivo, buscamos o detalhe individual.
-async function fetchMatchGoals(matchId) {
+async function fetchMatchGoals(matchId, isFinished) {
+  if (goalsCache.has(matchId)) return goalsCache.get(matchId);
   try {
     const data = await fetchJson(`/matches/${matchId}`);
-    return (data.goals || []).map(g => ({
+    const goals = (data.goals || []).map(g => ({
       minute: g.minute,
       team: ptAbbr(g.team?.tla || ''),
       player: g.scorer?.name || '',
       type: g.type || 'REGULAR',
     }));
+    // Só guarda em cache permanente se o jogo já encerrou (dado definitivo).
+    if (isFinished && goals.length) goalsCache.set(matchId, goals);
+    return goals;
   } catch (e) {
     return [];
   }
@@ -68,14 +77,23 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  try {
-    // Buscar standings e matches em paralelo
-    const [standData, matchData, scorerData] = await Promise.all([
-      fetchJson(`/competitions/${COMP_ID}/standings`),
-      fetchJson(`/competitions/${COMP_ID}/matches`),
-      fetchJson(`/competitions/${COMP_ID}/scorers?limit=20`),
-    ]);
+  // Busca standings, matches e scorers em paralelo, mas sem deixar
+  // uma falha isolada (ex: rate limit 429 do plano free) derrubar a
+  // resposta inteira — cada uma cai pra vazio se falhar, e seguimos
+  // com o que der certo. Isso é essencial pro placar ao vivo continuar
+  // atualizando mesmo se, por exemplo, só o /scorers falhar.
+  const [standResult, matchResult, scorerResult] = await Promise.allSettled([
+    fetchJson(`/competitions/${COMP_ID}/standings`),
+    fetchJson(`/competitions/${COMP_ID}/matches`),
+    fetchJson(`/competitions/${COMP_ID}/scorers?limit=20`),
+  ]);
 
+  const errors = [];
+  const standData  = standResult.status  === 'fulfilled' ? standResult.value  : (errors.push('standings: '+standResult.reason?.message), {});
+  const matchData  = matchResult.status  === 'fulfilled' ? matchResult.value  : (errors.push('matches: '+matchResult.reason?.message), {});
+  const scorerData = scorerResult.status === 'fulfilled' ? scorerResult.value : (errors.push('scorers: '+scorerResult.reason?.message), {});
+
+  try {
     // --- STANDINGS ---
     const standings = {};
     for (const grpObj of (standData.standings || [])) {
@@ -123,7 +141,7 @@ export default async function handler(req, res) {
 
     // --- GOLEADORES DO MATA-MATA (busca individual, pois a lista bulk não traz) ---
     const knockoutStages = ['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
-    const MAX_DETAIL_FETCHES = 7; // respeita o limite de 10 req/min do plano free (3 já usadas acima)
+    const MAX_DETAIL_FETCHES = 5; // margem extra de segurança dentro do limite de 10 req/min do plano free
     const needGoals = fixtures.filter(f =>
       knockoutStages.includes(f.stage) &&
       (f.status === 'FINISHED' || f.status === 'IN_PLAY' || f.status === 'PAUSED') &&
@@ -132,7 +150,7 @@ export default async function handler(req, res) {
     ).slice(0, MAX_DETAIL_FETCHES);
 
     for (const f of needGoals) {
-      const detailGoals = await fetchMatchGoals(f.id);
+      const detailGoals = await fetchMatchGoals(f.id, f.status === 'FINISHED');
       if (detailGoals.length) f.goals = detailGoals;
     }
 
@@ -149,9 +167,10 @@ export default async function handler(req, res) {
       standings,
       fixtures,
       scorers,
+      partialErrors: errors.length ? errors : undefined,
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, partialErrors: errors });
   }
 }
