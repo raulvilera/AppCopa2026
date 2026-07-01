@@ -1938,9 +1938,10 @@ function renderGameCard(g) {
 }
 
 function watchLiveUrl(team1, team2) {
-  // CazéTV transmite ao vivo e de graça os 104 jogos da Copa do Mundo 2026
-  // (parceria oficial com a FIFA), então o botão leva direto pro canal.
-  return 'https://www.youtube.com/@CazeTV/streams';
+  // youtube.com/@canal/live redireciona automaticamente para a
+  // transmissão AO VIVO em andamento naquele canal — sem precisar
+  // saber o ID do vídeo, então cai direto no jogo que está rolando.
+  return 'https://www.youtube.com/@CazeTV/live';
 }
 
 function renderBracket() {
