@@ -1,7 +1,7 @@
 // api/scores.js — Vercel Serverless Function
 // Busca dados ao vivo da Copa do Mundo 2026 via football-data.org v4
 
-const API_KEY = '6fdc2bc97fe042e787cb01979b7beeed';
+const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
 const BASE    = 'https://api.football-data.org/v4';
 const COMP_ID = 2000; // FIFA World Cup (código WC)
 
@@ -165,6 +165,11 @@ function ptAbbr(tla)  { return ABBR_MAP[tla] || tla; }
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
   res.setHeader('Access-Control-Allow-Origin', '*');
+
+  if (!API_KEY) {
+    res.status(500).json({ error: 'FOOTBALL_DATA_API_KEY nao configurada nas variaveis de ambiente da Vercel.' });
+    return;
+  }
 
   // Busca standings, matches e scorers em paralelo, mas sem deixar
   // uma falha isolada (ex: rate limit 429 do plano free) derrubar a
