@@ -588,8 +588,13 @@ body {
 .bm-watch-live { cursor: pointer; font: inherit; }
 .wm-video-wrap { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
 .wm-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.wm-note { padding: 12px 18px 4px; font-size: 12.5px; line-height: 1.5; color: var(--chalk-faint); }
+.wm-loading, .wm-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; text-align: center; }
+.wm-loading { color: var(--chalk-faint); font-size: 13px; }
+.wm-empty-icon { font-size: 32px; opacity: .7; }
+.wm-empty-text { color: var(--chalk-faint); font-size: 13px; max-width: 320px; }
+.wm-note { padding: 12px 18px 16px; font-size: 12.5px; line-height: 1.5; color: var(--chalk-faint); }
 .wm-note a { color: var(--gold); }
+.wm-fallback-btn { display: inline-block; padding: 10px 18px; background: var(--gold); color: #14231a; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none; }
 .wm-title-bar { padding: 14px 44px 12px 18px; font-family: var(--font-head); font-weight: 700; font-size: 15px; letter-spacing: .02em; }
 .bracket-card-clickable { cursor: pointer; }
 .bracket-card-clickable:active { opacity: 0.85; }
@@ -1990,14 +1995,6 @@ function renderGameCard(g) {
 
 var watchLiveOpen = false;
 
-function watchLiveEmbedUrl() {
-  // Embed oficial do canal da CazéTV (ID fixo do canal). Mostra o que
-  // estiver ao vivo NA CAZÉTV no momento — o canal transmite vários
-  // esportes (não só futebol), então em horários sem jogo da Copa pode
-  // aparecer outra transmissão do canal (ex.: tênis de mesa).
-  return 'https://www.youtube.com/embed/live_stream?channel=UCZiYbVptd3PVPf4f6eR6UaQ&autoplay=1';
-}
-
 function watchLiveSearchUrl(team1, team2) {
   var h = TEAM_NAMES[team1] || team1;
   var a = TEAM_NAMES[team2] || team2;
@@ -2005,18 +2002,24 @@ function watchLiveSearchUrl(team1, team2) {
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
 }
 
+function watchModalShell(hName, aName, bodyHtml) {
+  return '<button class="mm-close" onclick="closeWatchLive()">&#10005;</button>' +
+    '<div class="wm-title-bar">' + hName + ' × ' + aName + ' — CazéTV</div>' +
+    bodyHtml;
+}
+
 function openWatchLive(team1, team2) {
   var hName = TEAM_NAMES[team1] || team1;
   var aName = TEAM_NAMES[team2] || team2;
   var modal = document.getElementById('watch-modal');
   var overlay = document.getElementById('overlay');
+  var searchUrl = watchLiveSearchUrl(team1, team2);
 
-  modal.innerHTML =
-    '<button class="mm-close" onclick="closeWatchLive()">&#10005;</button>' +
-    '<div class="wm-title-bar">' + hName + ' × ' + aName + ' — CazéTV</div>' +
-    '<div class="wm-video-wrap"><iframe src="' + watchLiveEmbedUrl() + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>' +
-    '<div class="wm-note">Este player mostra a transmissão ao vivo da CazéTV. Se o canal estiver exibindo outro conteúdo no momento (a CazéTV transmite vários esportes), ' +
-    'experimente <a href="' + watchLiveSearchUrl(team1, team2) + '" target="_blank" rel="noopener">buscar o jogo diretamente no YouTube</a>.</div>';
+  // Estado inicial: carregando, enquanto perguntamos pra API do YouTube
+  // qual e o video ao vivo agora no canal da CazeTV.
+  modal.innerHTML = watchModalShell(hName, aName,
+    '<div class="wm-video-wrap"><div class="wm-loading">Procurando a transmissao ao vivo…</div></div>' +
+    '<div class="wm-note">Se demorar, <a href="' + searchUrl + '" target="_blank" rel="noopener">busque o jogo diretamente no YouTube</a>.</div>');
 
   requestAnimationFrame(function() {
     modal.classList.add('show');
@@ -2024,13 +2027,43 @@ function openWatchLive(team1, team2) {
     watchLiveOpen = true;
   });
   document.addEventListener('keydown', onWatchLiveEsc);
+
+  fetch('/api/live-video')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!watchLiveOpen) return; // usuario ja fechou o modal
+      if (data.videoId) {
+        modal.innerHTML = watchModalShell(hName, aName,
+          '<div class="wm-video-wrap"><iframe src="https://www.youtube.com/embed/' + data.videoId + '?autoplay=1" ' +
+            'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>' +
+          '<div class="wm-note">Transmissao ao vivo da CazeTV. Se o video acima nao for a partida esperada, ' +
+            '<a href="' + searchUrl + '" target="_blank" rel="noopener">busque diretamente no YouTube</a>.</div>');
+      } else {
+        modal.innerHTML = watchModalShell(hName, aName,
+          '<div class="wm-video-wrap wm-empty">' +
+            '<div class="wm-empty-icon">📺</div>' +
+            '<div class="wm-empty-text">A CazéTV não está transmitindo nada ao vivo agora' +
+            (data.error ? ' (ou não foi possível confirmar).' : '.') + '</div>' +
+          '</div>' +
+          '<div class="wm-note"><a class="wm-fallback-btn" href="' + searchUrl + '" target="_blank" rel="noopener">Buscar o jogo no YouTube</a></div>');
+      }
+    })
+    .catch(function() {
+      if (!watchLiveOpen) return;
+      modal.innerHTML = watchModalShell(hName, aName,
+        '<div class="wm-video-wrap wm-empty">' +
+          '<div class="wm-empty-icon">📺</div>' +
+          '<div class="wm-empty-text">Não foi possível verificar a transmissão ao vivo.</div>' +
+        '</div>' +
+        '<div class="wm-note"><a class="wm-fallback-btn" href="' + searchUrl + '" target="_blank" rel="noopener">Buscar o jogo no YouTube</a></div>');
+    });
 }
 
 function closeWatchLive() {
   var modal = document.getElementById('watch-modal');
   var overlay = document.getElementById('overlay');
   modal.classList.remove('show');
-  modal.innerHTML = ''; // para o vídeo ao fechar
+  modal.innerHTML = ''; // para o video ao fechar
   if (!modalOpen && !groupModalOpen && !bracketStatsOpen) overlay.classList.remove('show');
   document.removeEventListener('keydown', onWatchLiveEsc);
   watchLiveOpen = false;
