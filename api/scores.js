@@ -44,6 +44,23 @@ async function fetchJson(path) {
   return res.json();
 }
 
+// A lista de partidas (bulk) não traz os goleadores — isso só vem
+// ao buscar uma partida específica pelo id. Por isso, para jogos do
+// mata-mata já finalizados/ao vivo, buscamos o detalhe individual.
+async function fetchMatchGoals(matchId) {
+  try {
+    const data = await fetchJson(`/matches/${matchId}`);
+    return (data.goals || []).map(g => ({
+      minute: g.minute,
+      team: ptAbbr(g.team?.tla || ''),
+      player: g.scorer?.name || '',
+      type: g.type || 'REGULAR',
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
 function ptName(name) { return TEAM_PT[name] || name; }
 function ptAbbr(tla)  { return ABBR_MAP[tla] || tla; }
 
@@ -103,6 +120,21 @@ export default async function handler(req, res) {
         hs, as, goals,
       };
     });
+
+    // --- GOLEADORES DO MATA-MATA (busca individual, pois a lista bulk não traz) ---
+    const knockoutStages = ['LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
+    const MAX_DETAIL_FETCHES = 7; // respeita o limite de 10 req/min do plano free (3 já usadas acima)
+    const needGoals = fixtures.filter(f =>
+      knockoutStages.includes(f.stage) &&
+      (f.status === 'FINISHED' || f.status === 'IN_PLAY' || f.status === 'PAUSED') &&
+      (!f.goals || f.goals.length === 0) &&
+      (f.hs > 0 || f.as > 0) // só vale a pena buscar se houve gol
+    ).slice(0, MAX_DETAIL_FETCHES);
+
+    for (const f of needGoals) {
+      const detailGoals = await fetchMatchGoals(f.id);
+      if (detailGoals.length) f.goals = detailGoals;
+    }
 
     // --- SCORERS ---
     const scorers = (scorerData.scorers || []).map(s => ({
